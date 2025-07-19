@@ -1,176 +1,331 @@
-# 🏢 Sistema de Administración Residencial
+# 🏢 Residential Admin - Sistema de Gestión Residencial
 
-Sistema completo de administración para unidades residenciales, desarrollado con tecnologías modernas y arquitectura escalable.
+## 🚀 Descripción
 
-## 🚀 Tecnologías
+Sistema completo de gestión residencial con **backend robusto** en Node.js + Express + TypeScript + Prisma, preparado para integrar con **frontend Angular 20**. Incluye gestión completa de personas, roles, unidades residenciales, vehículos y auditoría.
 
-### Backend
-- **Node.js** + **Express** + **TypeScript**
+## ✨ Características Implementadas
+
+### 🏗️ **Arquitectura Robusta**
+- ✅ **Clean Architecture** con separación de capas
+- ✅ **TypeScript** con configuración estricta
+- ✅ **Prisma ORM** con PostgreSQL
+- ✅ **Express.js** con middleware de seguridad
+- ✅ **Validaciones** con class-validator
+- ✅ **Respuestas estandarizadas** con metadata
+
+### 👥 **Gestión de Personas**
+- ✅ **CRUD completo** con soft delete
+- ✅ **Validaciones robustas** de datos
+- ✅ **Búsqueda avanzada** con filtros
+- ✅ **Paginación** y ordenamiento
+- ✅ **Autocompletado** para búsquedas
+- ✅ **Verificación de duplicados**
+- ✅ **Múltiples emails y teléfonos**
+- ✅ **Gestión de imágenes**
+- ✅ **Estados de usuario** (activo/inactivo)
+
+### 🎭 **Sistema de Roles**
+- ✅ **Roles predefinidos**: Administrador, Propietario, Inquilino, Visitante
+- ✅ **Permisos granulares** por rol
+- ✅ **Asignación de roles** a personas
+- ✅ **Relación con unidades residenciales**
+
+### 🏠 **Gestión Residencial**
+- ✅ **Unidades residenciales** (torres)
+- ✅ **Apartamentos** con pisos
+- ✅ **Asignación de personas** a apartamentos
+- ✅ **Gestión de vehículos** por persona
+
+### 🔍 **Funcionalidades Avanzadas**
+- ✅ **Auditoría automática** de cambios
+- ✅ **Soft delete** con restauración
+- ✅ **Estadísticas** y reportes
+- ✅ **Rate limiting** y seguridad
+- ✅ **CORS configurado** para frontend
+- ✅ **Logging** de operaciones
+
+### 📊 **Datos de Prueba**
+- ✅ **Script de seed** con datos realistas
+- ✅ **6 personas** con diferentes roles
+- ✅ **2 unidades residenciales** con apartamentos
+- ✅ **Emails, teléfonos e imágenes** asociadas
+- ✅ **Vehículos** registrados
+
+---
+
+## 🛠️ Stack Tecnológico
+
+### **Backend**
+- **Node.js** 18+ con TypeScript
+- **Express.js** con middleware de seguridad
 - **Prisma ORM** para PostgreSQL
-- **JWT** para autenticación
-- **Clean Architecture** por módulos
+- **class-validator** para validaciones
+- **Helmet** para seguridad
+- **CORS** configurado para Angular
+- **Morgan** para logging
+- **Rate limiting** para protección
 
-### Base de Datos
-- **PostgreSQL** con mejoras de:
-  - Soft Delete (`deleted_at`)
-  - Auditoría (`created_by`, `updated_by`)
-  - Índices secundarios para optimización
+### **Base de Datos**
+- **PostgreSQL** con Prisma
+- **Índices optimizados** para performance
+- **Soft delete** implementado
+- **Campos de auditoría** (created_by, updated_by)
+- **Relaciones complejas** bien definidas
 
-### Frontend (Próximamente)
-- **Angular v20** + **TypeScript**
+### **Desarrollo**
+- **TypeScript** con configuración estricta
+- **ESLint** y **Prettier** para código limpio
+- **Jest** para testing
+- **ts-node-dev** para desarrollo
+- **Prisma Studio** para visualización
+
+---
 
 ## 📁 Estructura del Proyecto
 
 ```
 residential_admin/
-├── backend/                    # Backend Node.js + Express
+├── backend/
 │   ├── src/
-│   │   ├── modules/           # Módulos por dominio
-│   │   ├── config/            # Configuración
-│   │   ├── shared/            # Utilidades compartidas
-│   │   └── app.ts             # Aplicación Express
+│   │   ├── modules/
+│   │   │   └── person/
+│   │   │       ├── application/
+│   │   │       │   ├── dto/
+│   │   │       │   │   └── create-person.dto.ts
+│   │   │       │   └── services/
+│   │   │       │       └── person.service.ts
+│   │   │       ├── infrastructure/
+│   │   │       │   └── controllers/
+│   │   │       │       └── person.controller.ts
+│   │   │       └── interface/
+│   │   │           └── routes/
+│   │   │               └── person.routes.ts
+│   │   ├── shared/
+│   │   │   ├── types/
+│   │   │   │   └── api.types.ts
+│   │   │   └── utils/
+│   │   │       └── response.utils.ts
+│   │   ├── config/
+│   │   │   └── database.ts
+│   │   ├── scripts/
+│   │   │   └── seed.ts
+│   │   ├── types/
+│   │   │   └── express.d.ts
+│   │   └── app.ts
 │   ├── prisma/
-│   │   └── schema.prisma      # Modelo de datos
-│   └── package.json
-├── frontend/                   # Frontend Angular (próximamente)
-├── residential_schema_with_improvements.sql  # Esquema SQL mejorado
-├── entity.txt                  # Documentación de entidades
+│   │   └── schema.prisma
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── API_DOCUMENTATION.md
+│   └── test-api.http
+├── residential_schema_with_improvements.sql
+├── entity.txt
 └── README.md
 ```
 
-## 🗄️ Modelos de Datos
+---
 
-### Principales
-- **Person**: Personas (residentes, visitantes, etc.)
-- **ResidentialUnit**: Unidades residenciales
-- **Tower**: Torres/bloques
-- **Apartment**: Apartamentos
-- **Role**: Roles del sistema
-- **Permission**: Permisos
-- **Vehicle**: Vehículos
-- **Parking**: Parqueaderos
-- **CommonArea**: Áreas comunes
+## 🚀 Instalación y Configuración
 
-### Características
-- ✅ Soft Delete (campo `deleted_at`)
-- ✅ Auditoría (campos `created_by`, `updated_by`)
-- ✅ Índices optimizados para búsquedas frecuentes
-- ✅ Relaciones bien definidas
-- ✅ Claves compuestas donde corresponde
+### **Prerrequisitos**
+- Node.js 18+
+- PostgreSQL 12+
+- npm o yarn
 
-## 🛠️ Instalación y Configuración
-
-### Prerrequisitos
-- Node.js (v18+)
-- PostgreSQL
-- Git
-
-### 1. Clonar el repositorio
+### **1. Clonar y Configurar**
 ```bash
-git clone <url-del-repositorio>
-cd residential_admin
+git clone https://github.com/mzrivic/residential_admin.git
+cd residential_admin/backend
+npm install
 ```
 
-### 2. Configurar Base de Datos
+### **2. Configurar Base de Datos**
 ```bash
 # Crear base de datos PostgreSQL
-createdb residential_management
-
-# Ejecutar esquema mejorado
-psql -U tu_usuario -d residential_management -f residential_schema_with_improvements.sql
-```
-
-### 3. Configurar Backend
-```bash
-cd backend
-npm install
+createdb residential_db
 
 # Configurar variables de entorno
 cp .env.example .env
-# Editar .env con tus credenciales de base de datos
-
-# Sincronizar Prisma
-npx prisma db pull
-npx prisma generate
+# Editar .env con tus credenciales de DB
 ```
 
-### 4. Ejecutar Backend
-```bash
-npm run dev
-```
-
-## 🔧 Comandos Útiles
-
-### Prisma
+### **3. Ejecutar Migraciones y Seed**
 ```bash
 # Generar cliente Prisma
-npx prisma generate
+npm run prisma:generate
 
-# Abrir Prisma Studio
-npx prisma studio
+# Ejecutar migraciones
+npm run prisma:migrate
 
-# Resetear base de datos
-npx prisma migrate reset
-
-# Crear migración
-npx prisma migrate dev --name nombre_migracion
+# Poblar con datos de prueba
+npm run db:seed
 ```
 
-### Desarrollo
+### **4. Ejecutar Servidor**
 ```bash
-# Ejecutar en modo desarrollo
+# Desarrollo
 npm run dev
 
-# Ejecutar tests
-npm test
-
-# Build para producción
+# Producción
 npm run build
+npm start
 ```
 
-## 📊 Características del Sistema
+---
 
-### Gestión de Personas
-- Registro de residentes, visitantes y personal
-- Múltiples emails y teléfonos por persona
-- Roles dinámicos con fechas de vigencia
-- Vehículos asociados
+## 📚 API Endpoints
 
-### Gestión de Propiedades
-- Unidades residenciales con información completa
-- Torres y pisos organizados jerárquicamente
-- Apartamentos con estados de ocupación y propiedad
-- Parqueaderos asignados
+### **Base URL**: `http://localhost:3000`
 
-### Control de Acceso
-- Sistema de roles y permisos
-- Auditoría completa de cambios
-- Soft delete para mantener historial
+### **👥 Gestión de Personas**
+- `POST /api/v1/persons` - Crear persona
+- `GET /api/v1/persons` - Listar personas (con filtros)
+- `GET /api/v1/persons/:id` - Obtener persona por ID
+- `PUT /api/v1/persons/:id` - Actualizar persona
+- `PUT /api/v1/persons/:id/partial` - Actualizar parcialmente
+- `DELETE /api/v1/persons/:id` - Eliminar persona (soft delete)
+- `POST /api/v1/persons/:id/restore` - Restaurar persona
 
-### Áreas Comunes
-- Gestión de espacios compartidos
-- Reservas y horarios
-- Capacidad y ubicación
+### **🔍 Utilidades**
+- `GET /api/v1/persons/search/autocomplete` - Autocompletado
+- `GET /api/v1/persons/stats/overview` - Estadísticas
+- `POST /api/v1/persons/validate` - Validar datos
+- `GET /api/v1/persons/duplicates/check` - Verificar duplicados
 
-## 🔒 Seguridad
+### **🏥 Sistema**
+- `GET /health` - Health check
+- `GET /` - Información de la API
 
-- Autenticación JWT
-- Soft delete para mantener integridad de datos
-- Auditoría completa de cambios
-- Validación de datos en todos los endpoints
+---
 
-## 🚀 Próximas Características
+## 🧪 Testing
 
-- [ ] Frontend con Angular 20
-- [ ] API REST completa
-- [ ] Sistema de notificaciones
-- [ ] Reportes y estadísticas
-- [ ] Dashboard administrativo
-- [ ] Aplicación móvil
+### **Probar API con HTTP**
+```bash
+# Usar el archivo test-api.http con VS Code REST Client
+# o importar en Postman
+```
 
-## 📝 Licencia
+### **Ejecutar Tests**
+```bash
+npm test
+npm run test:watch
+```
 
-Este proyecto está bajo la Licencia MIT.
+### **Prisma Studio**
+```bash
+npm run prisma:studio
+# Acceder a: http://localhost:5555
+```
+
+---
+
+## 📊 Datos de Prueba Incluidos
+
+### **Personas Creadas**
+1. **Juan Carlos Pérez** - Administrador
+2. **María Elena Rodríguez** - Propietaria (A01)
+3. **Carlos Alberto Martínez** - Propietario (A02)
+4. **Ana Sofía García** - Inquilina (A03)
+5. **Luis Fernando Herrera** - Inquilino (B01)
+6. **Patricia Isabel Vargas** - Visitante
+
+### **Unidades Residenciales**
+- **Torre A**: 10 apartamentos
+- **Torre B**: 8 apartamentos
+
+### **Roles**
+- Administrador (permisos completos)
+- Propietario (READ, WRITE)
+- Inquilino (READ)
+- Visitante (READ)
+
+---
+
+## 🔧 Configuración Avanzada
+
+### **Variables de Entorno**
+```env
+# Base de datos
+DATABASE_URL="postgresql://usuario:password@localhost:5432/residential_db"
+
+# Servidor
+PORT=3000
+NODE_ENV=development
+
+# Frontend (para CORS)
+FRONTEND_URL=http://localhost:4200
+
+# Seguridad
+JWT_SECRET=tu_jwt_secret_aqui
+```
+
+### **Scripts Disponibles**
+```bash
+npm run dev          # Desarrollo con hot reload
+npm run build        # Compilar TypeScript
+npm run start        # Ejecutar en producción
+npm run lint         # Verificar código
+npm run lint:fix     # Corregir código
+npm run format       # Formatear código
+npm run test         # Ejecutar tests
+npm run prisma:studio # Abrir Prisma Studio
+npm run db:seed      # Poblar con datos de prueba
+```
+
+---
+
+## 📈 Próximas Funcionalidades
+
+### **Fase 2: Autenticación y Autorización**
+- [ ] JWT Authentication
+- [ ] Middleware de autorización
+- [ ] Refresh tokens
+- [ ] Password hashing con bcrypt
+
+### **Fase 3: Operaciones Masivas**
+- [ ] Importación CSV/Excel
+- [ ] Exportación de datos
+- [ ] Operaciones bulk (crear, actualizar, eliminar)
+- [ ] Validación masiva
+
+### **Fase 4: Frontend Angular**
+- [ ] Angular 20 con TypeScript
+- [ ] Angular Material UI
+- [ ] Reactive Forms con validaciones
+- [ ] Interceptores HTTP
+- [ ] Guards de autenticación
+
+### **Fase 5: Funcionalidades Avanzadas**
+- [ ] Notificaciones en tiempo real
+- [ ] Reportes y dashboards
+- [ ] Gestión de archivos
+- [ ] Auditoría detallada
+- [ ] API rate limiting avanzado
+
+---
+
+## 🛡️ Seguridad Implementada
+
+- ✅ **Helmet** para headers de seguridad
+- ✅ **CORS** configurado correctamente
+- ✅ **Rate limiting** para prevenir abuso
+- ✅ **Validación de entrada** con class-validator
+- ✅ **Sanitización** de datos
+- ✅ **Soft delete** para preservar datos
+- ✅ **Logging** de operaciones
+- ✅ **Manejo de errores** estandarizado
+
+---
+
+## 📝 Documentación
+
+- **[API Documentation](backend/API_DOCUMENTATION.md)** - Documentación completa de endpoints
+- **[Test API](backend/test-api.http)** - Archivo de pruebas HTTP
+- **[Prisma Schema](backend/prisma/schema.prisma)** - Esquema de base de datos
+
+---
 
 ## 🤝 Contribución
 
@@ -180,10 +335,44 @@ Este proyecto está bajo la Licencia MIT.
 4. Push a la rama (`git push origin feature/AmazingFeature`)
 5. Abre un Pull Request
 
-## 📞 Contacto
+---
 
-Para preguntas o soporte, contacta al equipo de desarrollo.
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
 
 ---
 
-**Desarrollado con ❤️ para la administración residencial moderna** 
+## 🎯 Estado del Proyecto
+
+### ✅ **Completado (Fase 1)**
+- [x] Arquitectura base robusta
+- [x] CRUD completo de personas
+- [x] Sistema de roles y permisos
+- [x] Gestión residencial básica
+- [x] Validaciones y manejo de errores
+- [x] Datos de prueba
+- [x] Documentación completa
+- [x] Testing básico
+
+### 🚧 **En Desarrollo**
+- [ ] Autenticación JWT
+- [ ] Operaciones masivas
+- [ ] Frontend Angular
+
+### 📋 **Planificado**
+- [ ] Notificaciones
+- [ ] Reportes avanzados
+- [ ] Gestión de archivos
+- [ ] Auditoría detallada
+
+---
+
+## 📞 Contacto
+
+- **GitHub**: [mzrivic](https://github.com/mzrivic)
+- **Proyecto**: [Residential Admin](https://github.com/mzrivic/residential_admin)
+
+---
+
+**¡El sistema está listo para desarrollo y testing! 🎉** 

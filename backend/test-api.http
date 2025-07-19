@@ -1,0 +1,115 @@
+### Variables
+@baseUrl = http://localhost:3000
+@apiUrl = {{baseUrl}}/api/v1
+
+### Health Check
+GET {{baseUrl}}/health
+
+### Información de la API
+GET {{baseUrl}}/
+
+### ===== GESTIÓN DE PERSONAS =====
+
+### 1. Crear Persona
+POST {{apiUrl}}/persons
+Content-Type: application/json
+
+{
+  "document_type": "CC",
+  "document_number": "99999999",
+  "full_name": "Ana María López García",
+  "gender": "F",
+  "photo_url": "https://via.placeholder.com/150/28a745/ffffff?text=AM",
+  "birth_date": "1990-05-15",
+  "notes": "Nueva persona de prueba",
+  "alias": "Ana",
+  "is_active": true,
+  "username": "ana.lopez",
+  "password": "password123",
+  "language": "es",
+  "timezone": "America/Bogota",
+  "emails": [
+    {
+      "email": "ana.lopez@email.com"
+    }
+  ],
+  "phones": [
+    {
+      "phone": "+57 300 999 8888"
+    }
+  ],
+  "images": [
+    {
+      "image_url": "https://via.placeholder.com/300x400/28a745/ffffff?text=Ana+Photo"
+    }
+  ]
+}
+
+### 2. Listar Personas
+GET {{apiUrl}}/persons?page=1&limit=5
+
+### 3. Listar Personas con Filtros
+GET {{apiUrl}}/persons?search=Juan&status=active&sort=full_name&order=asc
+
+### 4. Obtener Persona por ID
+GET {{apiUrl}}/persons/1
+
+### 5. Actualizar Persona Parcialmente
+PUT {{apiUrl}}/persons/1/partial
+Content-Type: application/json
+
+{
+  "full_name": "Juan Carlos Pérez González Actualizado",
+  "notes": "Notas actualizadas desde API"
+}
+
+### 6. Autocompletado
+GET {{apiUrl}}/persons/search/autocomplete?q=Juan&limit=5
+
+### 7. Estadísticas
+GET {{apiUrl}}/persons/stats/overview
+
+### 8. Verificar Duplicados
+GET {{apiUrl}}/persons/duplicates/check?document_number=12345678
+
+### 9. Validar Datos
+POST {{apiUrl}}/persons/validate
+Content-Type: application/json
+
+{
+  "document_type": "CC",
+  "document_number": "11111111",
+  "full_name": "Pedro José Silva",
+  "gender": "M"
+}
+
+### 10. Eliminar Persona (Soft Delete)
+DELETE {{apiUrl}}/persons/1
+
+### 11. Restaurar Persona
+POST {{apiUrl}}/persons/1/restore
+
+### ===== PRUEBAS DE ERROR =====
+
+### Persona no encontrada
+GET {{apiUrl}}/persons/999
+
+### Datos inválidos
+POST {{apiUrl}}/persons
+Content-Type: application/json
+
+{
+  "document_type": "INVALID",
+  "document_number": "",
+  "full_name": ""
+}
+
+### Duplicado
+POST {{apiUrl}}/persons
+Content-Type: application/json
+
+{
+  "document_type": "CC",
+  "document_number": "12345678",
+  "full_name": "Persona Duplicada"
+} 
