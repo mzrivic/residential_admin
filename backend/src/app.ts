@@ -4,6 +4,10 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import personRoutes from './modules/person/interface/routes/person.routes';
+import authRoutes from './modules/auth/interface/routes/auth.routes';
+import roleRoutes from './modules/role/interface/routes/role.routes';
+import permissionRoutes from './modules/permission/interface/routes/permission.routes';
+import auditRoutes from './modules/audit/interface/routes/audit.routes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -60,6 +64,10 @@ app.use((req, res, next) => {
 
 // Rutas de la API
 app.use('/api/v1/persons', personRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/roles', roleRoutes);
+app.use('/api/v1/permissions', permissionRoutes);
+app.use('/api/v1/audit', auditRoutes);
 
 // Ruta de salud
 app.get('/health', (req, res) => {
@@ -92,6 +100,10 @@ app.get('/', (req, res) => {
       description: 'API para gestión de personas, roles y unidades residenciales',
       endpoints: {
         persons: '/api/v1/persons',
+        auth: '/api/v1/auth',
+        roles: '/api/v1/roles',
+        permissions: '/api/v1/permissions',
+        audit: '/api/v1/audit',
         health: '/health'
       }
     },
@@ -148,6 +160,10 @@ app.listen(PORT, () => {
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
   console.log(`📚 API docs: http://localhost:${PORT}/`);
   console.log(`👥 Personas API: http://localhost:${PORT}/api/v1/persons`);
+  console.log(`🔐 Auth API: http://localhost:${PORT}/api/v1/auth`);
+  console.log(`👤 Roles API: http://localhost:${PORT}/api/v1/roles`);
+  console.log(`🔑 Permissions API: http://localhost:${PORT}/api/v1/permissions`);
+  console.log(`📝 Audit API: http://localhost:${PORT}/api/v1/audit`);
 });
 
 export default app; 

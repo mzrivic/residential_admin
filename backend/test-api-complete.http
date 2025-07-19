@@ -1,0 +1,498 @@
+### Variables de entorno
+@baseUrl = http://localhost:3000
+@apiVersion = v1
+@adminToken = {{loginAdmin.response.body.data.access_token}}
+@userToken = {{loginUser.response.body.data.access_token}}
+@securityToken = {{loginSecurity.response.body.data.access_token}}
+
+### ========================================
+### AUTENTICACIÓN
+### ========================================
+
+### Login como Administrador
+# @name loginAdmin
+POST {{baseUrl}}/api/{{apiVersion}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "password123"
+}
+
+### Login como Usuario
+# @name loginUser
+POST {{baseUrl}}/api/{{apiVersion}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "usuario",
+  "password": "password123"
+}
+
+### Login como Seguridad
+# @name loginSecurity
+POST {{baseUrl}}/api/{{apiVersion}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "seguridad",
+  "password": "password123"
+}
+
+### Registro de nuevo usuario
+POST {{baseUrl}}/api/{{apiVersion}}/auth/register
+Content-Type: application/json
+
+{
+  "full_name": "Nuevo Usuario",
+  "username": "nuevo_usuario",
+  "email": "nuevo@residential.com",
+  "password": "password123",
+  "confirm_password": "password123",
+  "document_type": "CC",
+  "document_number": "98765432"
+}
+
+### Refresh Token
+POST {{baseUrl}}/api/{{apiVersion}}/auth/refresh-token
+Content-Type: application/json
+
+{
+  "refresh_token": "{{loginAdmin.response.body.data.refresh_token}}"
+}
+
+### Obtener información del usuario actual
+GET {{baseUrl}}/api/{{apiVersion}}/auth/me
+Authorization: Bearer {{adminToken}}
+
+### Cambiar contraseña
+POST {{baseUrl}}/api/{{apiVersion}}/auth/change-password
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "current_password": "password123",
+  "new_password": "newpassword123",
+  "confirm_new_password": "newpassword123"
+}
+
+### Logout
+POST {{baseUrl}}/api/{{apiVersion}}/auth/logout
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "all_sessions": false
+}
+
+### ========================================
+### PERSONAS
+### ========================================
+
+### Crear persona
+POST {{baseUrl}}/api/{{apiVersion}}/persons
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "full_name": "Juan Pérez",
+  "document_type": "CC",
+  "document_number": "12345678",
+  "email": "juan@example.com",
+  "phone": "+573001234567",
+  "gender": "M",
+  "birth_date": "1990-01-01",
+  "status": "ACTIVE"
+}
+
+### Obtener todas las personas
+GET {{baseUrl}}/api/{{apiVersion}}/persons?page=1&limit=10
+Authorization: Bearer {{adminToken}}
+
+### Obtener persona por ID
+GET {{baseUrl}}/api/{{apiVersion}}/persons/1
+Authorization: Bearer {{adminToken}}
+
+### Actualizar persona
+PUT {{baseUrl}}/api/{{apiVersion}}/persons/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "full_name": "Juan Carlos Pérez",
+  "status": "ACTIVE"
+}
+
+### Actualizar parcialmente persona
+PUT {{baseUrl}}/api/{{apiVersion}}/persons/1/partial
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "status": "INACTIVE"
+}
+
+### Eliminar persona
+DELETE {{baseUrl}}/api/{{apiVersion}}/persons/1
+Authorization: Bearer {{adminToken}}
+
+### Restaurar persona
+POST {{baseUrl}}/api/{{apiVersion}}/persons/1/restore
+Authorization: Bearer {{adminToken}}
+
+### ========================================
+### OPERACIONES MASIVAS - PERSONAS
+### ========================================
+
+### Crear múltiples personas
+POST {{baseUrl}}/api/{{apiVersion}}/persons/bulk
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "persons": [
+    {
+      "full_name": "María García",
+      "document_type": "CC",
+      "document_number": "87654321",
+      "email": "maria@example.com",
+      "phone": "+573007654321",
+      "gender": "F",
+      "status": "ACTIVE"
+    },
+    {
+      "full_name": "Carlos López",
+      "document_type": "CC",
+      "document_number": "11223344",
+      "email": "carlos@example.com",
+      "phone": "+573004433221",
+      "gender": "M",
+      "status": "ACTIVE"
+    }
+  ],
+  "skip_duplicates": true
+}
+
+### Actualizar múltiples personas
+PUT {{baseUrl}}/api/{{apiVersion}}/persons/bulk
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "updates": [
+    {
+      "id": 1,
+      "data": {
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "id": 2,
+      "data": {
+        "status": "ACTIVE"
+      }
+    }
+  ]
+}
+
+### Eliminar múltiples personas
+DELETE {{baseUrl}}/api/{{apiVersion}}/persons/bulk
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "ids": [1, 2],
+  "permanent": false
+}
+
+### Importar CSV
+POST {{baseUrl}}/api/{{apiVersion}}/persons/import
+Authorization: Bearer {{adminToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="persons.csv"
+Content-Type: text/csv
+
+full_name,document_type,document_number,email,phone,gender,status
+Ana Silva,CC,55667788,ana@example.com,+5730055667788,F,ACTIVE
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Exportar CSV
+GET {{baseUrl}}/api/{{apiVersion}}/persons/export?format=csv
+Authorization: Bearer {{adminToken}}
+
+### ========================================
+### ROLES
+### ========================================
+
+### Crear rol
+POST {{baseUrl}}/api/{{apiVersion}}/roles
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Residente",
+  "description": "Rol para residentes del conjunto",
+  "alias": "resident",
+  "permission_ids": [1, 2]
+}
+
+### Obtener todos los roles
+GET {{baseUrl}}/api/{{apiVersion}}/roles?page=1&limit=10
+Authorization: Bearer {{adminToken}}
+
+### Obtener rol por ID
+GET {{baseUrl}}/api/{{apiVersion}}/roles/1
+Authorization: Bearer {{adminToken}}
+
+### Actualizar rol
+PUT {{baseUrl}}/api/{{apiVersion}}/roles/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "description": "Rol actualizado para residentes",
+  "permission_ids": [1, 2, 3]
+}
+
+### Eliminar rol
+DELETE {{baseUrl}}/api/{{apiVersion}}/roles/1
+Authorization: Bearer {{adminToken}}
+
+### Restaurar rol
+POST {{baseUrl}}/api/{{apiVersion}}/roles/1/restore
+Authorization: Bearer {{adminToken}}
+
+### Asignar permisos a rol
+POST {{baseUrl}}/api/{{apiVersion}}/roles/1/permissions
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "permission_ids": [1, 2, 3, 4]
+}
+
+### Obtener permisos de un rol
+GET {{baseUrl}}/api/{{apiVersion}}/roles/1/permissions
+Authorization: Bearer {{adminToken}}
+
+### Estadísticas de roles
+GET {{baseUrl}}/api/{{apiVersion}}/roles/stats/overview
+Authorization: Bearer {{adminToken}}
+
+### ========================================
+### PERMISOS
+### ========================================
+
+### Crear permiso
+POST {{baseUrl}}/api/{{apiVersion}}/permissions
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "code": "vehicle:create",
+  "description": "Crear vehículos"
+}
+
+### Obtener todos los permisos
+GET {{baseUrl}}/api/{{apiVersion}}/permissions?page=1&limit=10
+Authorization: Bearer {{adminToken}}
+
+### Obtener permiso por ID
+GET {{baseUrl}}/api/{{apiVersion}}/permissions/1
+Authorization: Bearer {{adminToken}}
+
+### Actualizar permiso
+PUT {{baseUrl}}/api/{{apiVersion}}/permissions/1
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "description": "Permiso actualizado para crear vehículos"
+}
+
+### Eliminar permiso
+DELETE {{baseUrl}}/api/{{apiVersion}}/permissions/1
+Authorization: Bearer {{adminToken}}
+
+### Restaurar permiso
+POST {{baseUrl}}/api/{{apiVersion}}/permissions/1/restore
+Authorization: Bearer {{adminToken}}
+
+### Obtener roles de un permiso
+GET {{baseUrl}}/api/{{apiVersion}}/permissions/1/roles
+Authorization: Bearer {{adminToken}}
+
+### Estadísticas de permisos
+GET {{baseUrl}}/api/{{apiVersion}}/permissions/stats/overview
+Authorization: Bearer {{adminToken}}
+
+### Obtener permisos disponibles
+GET {{baseUrl}}/api/{{apiVersion}}/permissions/available/list
+Authorization: Bearer {{adminToken}}
+
+### ========================================
+### AUDITORÍA
+### ========================================
+
+### Obtener historial de auditoría de una persona
+GET {{baseUrl}}/api/{{apiVersion}}/audit/history/person/1
+Authorization: Bearer {{adminToken}}
+
+### Obtener logs de auditoría
+GET {{baseUrl}}/api/{{apiVersion}}/audit/logs?table_name=person&operation=CREATE&page=1&limit=10
+Authorization: Bearer {{adminToken}}
+
+### Estadísticas de auditoría
+GET {{baseUrl}}/api/{{apiVersion}}/audit/stats?start_date=2024-01-01&end_date=2024-12-31
+Authorization: Bearer {{adminToken}}
+
+### Exportar logs de auditoría
+GET {{baseUrl}}/api/{{apiVersion}}/audit/export?format=csv&start_date=2024-01-01&end_date=2024-12-31
+Authorization: Bearer {{adminToken}}
+
+### Limpiar logs antiguos (simulación)
+DELETE {{baseUrl}}/api/{{apiVersion}}/audit/clean?days=90&dry_run=true
+Authorization: Bearer {{adminToken}}
+
+### Obtener resumen de cambios
+GET {{baseUrl}}/api/{{apiVersion}}/audit/summary/person/1/CREATE
+Authorization: Bearer {{adminToken}}
+
+### Actividad de usuario
+GET {{baseUrl}}/api/{{apiVersion}}/audit/user/1/activity?start_date=2024-01-01&end_date=2024-12-31
+Authorization: Bearer {{adminToken}}
+
+### ========================================
+### BÚSQUEDA Y FILTROS - PERSONAS
+### ========================================
+
+### Búsqueda avanzada
+GET {{baseUrl}}/api/{{apiVersion}}/persons/search/advanced?search=juan&status=ACTIVE&has_vehicles=true
+Authorization: Bearer {{adminToken}}
+
+### Autocompletado
+GET {{baseUrl}}/api/{{apiVersion}}/persons/search/autocomplete?q=juan
+Authorization: Bearer {{adminToken}}
+
+### Filtros disponibles
+GET {{baseUrl}}/api/{{apiVersion}}/persons/filters/available
+Authorization: Bearer {{adminToken}}
+
+### Validar datos
+POST {{baseUrl}}/api/{{apiVersion}}/persons/validate
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "full_name": "Test User",
+  "document_type": "CC",
+  "document_number": "12345678",
+  "email": "test@example.com"
+}
+
+### Validación masiva
+POST {{baseUrl}}/api/{{apiVersion}}/persons/bulk-validate
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "persons": [
+    {
+      "full_name": "User 1",
+      "document_type": "CC",
+      "document_number": "11111111"
+    },
+    {
+      "full_name": "User 2",
+      "document_type": "CC",
+      "document_number": "22222222"
+    }
+  ]
+}
+
+### Verificar duplicados
+GET {{baseUrl}}/api/{{apiVersion}}/persons/duplicates/check?document_number=12345678
+Authorization: Bearer {{adminToken}}
+
+### ========================================
+### REPORTES Y ESTADÍSTICAS - PERSONAS
+### ========================================
+
+### Estadísticas generales
+GET {{baseUrl}}/api/{{apiVersion}}/persons/stats/overview
+Authorization: Bearer {{adminToken}}
+
+### Estadísticas por rol
+GET {{baseUrl}}/api/{{apiVersion}}/persons/stats/by-role
+Authorization: Bearer {{adminToken}}
+
+### Estadísticas por estado
+GET {{baseUrl}}/api/{{apiVersion}}/persons/stats/by-status
+Authorization: Bearer {{adminToken}}
+
+### Reportes
+GET {{baseUrl}}/api/{{apiVersion}}/persons/reports?type=monthly&start_date=2024-01-01&end_date=2024-12-31
+Authorization: Bearer {{adminToken}}
+
+### ========================================
+### GESTIÓN DE ROLES - PERSONAS
+### ========================================
+
+### Obtener roles de una persona
+GET {{baseUrl}}/api/{{apiVersion}}/persons/1/roles
+Authorization: Bearer {{adminToken}}
+
+### Asignar roles masivamente
+POST {{baseUrl}}/api/{{apiVersion}}/persons/bulk-roles
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "person_ids": [1, 2, 3],
+  "role_ids": [1, 2]
+}
+
+### ========================================
+### VERIFICACIÓN - PERSONAS
+### ========================================
+
+### Verificar usuario
+POST {{baseUrl}}/api/{{apiVersion}}/persons/1/verify
+Authorization: Bearer {{adminToken}}
+
+### Verificar email
+POST {{baseUrl}}/api/{{apiVersion}}/persons/1/verify-email
+Authorization: Bearer {{adminToken}}
+
+### Verificar teléfono
+POST {{baseUrl}}/api/{{apiVersion}}/persons/1/verify-phone
+Authorization: Bearer {{adminToken}}
+
+### ========================================
+### UTILIDADES
+### ========================================
+
+### Health check
+GET {{baseUrl}}/health
+
+### Información de la API
+GET {{baseUrl}}/
+
+### ========================================
+### PRUEBAS DE PERMISOS
+### ========================================
+
+### Intentar acceder sin token
+GET {{baseUrl}}/api/{{apiVersion}}/persons
+# Sin Authorization header
+
+### Intentar acceder con token inválido
+GET {{baseUrl}}/api/{{apiVersion}}/persons
+Authorization: Bearer invalid-token
+
+### Intentar acceder con usuario sin permisos
+GET {{baseUrl}}/api/{{apiVersion}}/roles
+Authorization: Bearer {{userToken}}
+# El usuario regular no debería tener acceso a roles 

@@ -1,11 +1,7 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
 import { CreatePersonDto } from '../dto/create-person.dto';
 import { successResponse, errorResponse, paginatedResponse, notFoundError, duplicateError } from '../../../../shared/utils/response.utils';
+import prisma from '../../../../config/database';
 
-const prisma = new PrismaClient();
-
-@Injectable()
 export class PersonService {
   
   /**
@@ -22,7 +18,7 @@ export class PersonService {
       });
 
       if (existingPerson) {
-        throw new ConflictException(`Ya existe una persona con el documento ${createPersonDto.document_number}`);
+        throw new Error(`Ya existe una persona con el documento ${createPersonDto.document_number}`);
       }
 
       // Verificar si ya existe una persona con el mismo username (si se proporciona)
@@ -35,7 +31,7 @@ export class PersonService {
         });
 
         if (existingUsername) {
-          throw new ConflictException(`Ya existe una persona con el username ${createPersonDto.username}`);
+          throw new Error(`Ya existe una persona con el username ${createPersonDto.username}`);
         }
       }
 
@@ -87,11 +83,11 @@ export class PersonService {
       );
 
     } catch (error) {
-      if (error instanceof ConflictException) {
+      if (error instanceof Error) {
         throw error;
       }
       
-      throw new Error(`Error al crear persona: ${error.message}`);
+      throw new Error(`Error al crear persona: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 

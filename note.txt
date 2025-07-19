@@ -1,0 +1,451 @@
+backend/
+├── src/
+│   ├── modules/
+│   │   ├── person/
+│   │   │   ├── domain/
+│   │   │   │   ├── entities/
+│   │   │   │   ├── repositories/
+│   │   │   │   └── services/
+│   │   │   ├── application/
+│   │   │   │   ├── use-cases/
+│   │   │   │   ├── dto/
+│   │   │   │   └── validators/
+│   │   │   ├── infrastructure/
+│   │   │   │   ├── controllers/
+│   │   │   │   ├── repositories/
+│   │   │   │   └── middlewares/
+│   │   │   └── interface/
+│   │   │       ├── routes/
+│   │   │       └── schemas/
+│   │   ├── role/
+│   │   ├── permission/
+│   │   └── auth/
+│   ├── shared/
+│   │   ├── middleware/
+│   │   ├── utils/
+│   │   ├── constants/
+│   │   ├── types/
+│   │   └── errors/
+│   ├── config/
+│   └── app.ts
+
+2. 📊 MEJORAS EN EL MODELO DE DATOS
+Agregar Campos Esenciales
+
+model person {
+  // ... campos existentes ...
+  
+  // Campos para autenticación
+  username        String?         @unique
+  password_hash   String?
+  last_login      DateTime?
+  login_attempts  Int             @default(0)
+  locked_until    DateTime?
+  
+  // Campos para UX
+  status          PersonStatus    @default(ACTIVE)
+  priority        Int             @default(0)
+  tags            String[]        // Para categorización
+  
+  // Campos para internacionalización
+  language        String          @default("es")
+  timezone        String          @default("America/Bogota")
+  
+  // Campos para notificaciones
+  notification_preferences Json?  // Preferencias de notificación
+  
+  // Campos para validación
+  email_verified  Boolean         @default(false)
+  phone_verified  Boolean         @default(false)
+  document_verified Boolean       @default(false)
+  
+  // Campos para auditoría mejorada
+  verified_by     Int?
+  verified_at     DateTime?
+  
+  @@index([status])
+  @@index([priority])
+  @@index([created_at])
+}
+
+enum PersonStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+  BLOCKED
+}
+
+
+3. 🔐 SISTEMA DE AUTENTICACIÓN ROBUSTO
+Modelo de Sesiones
+
+model user_session {
+  id              String          @id @default(cuid())
+  person_id       Int
+  token           String          @unique
+  refresh_token   String          @unique
+  device_info     Json?
+  ip_address      String?
+  user_agent      String?
+  expires_at      DateTime
+  created_at      DateTime        @default(now())
+  last_activity   DateTime        @default(now())
+  is_active       Boolean         @default(true)
+  
+  person          person          @relation(fields: [person_id], references: [id])
+  
+  @@index([person_id])
+  @@index([expires_at])
+}
+
+4. 📝 SISTEMA DE VALIDACIÓN MEJORADO
+DTOs y Validaciones
+
+
+// DTOs para diferentes operaciones
+export class CreatePersonDto {
+  @IsString()
+  @IsNotEmpty()
+  @Length(2, 100)
+  full_name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^(CC|CE|TI|PP|NIT)$/)
+  document_type: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(5, 20)
+  document_number: string;
+
+  @IsEmail()
+  @IsOptional()
+  email?: string;
+
+  @IsPhoneNumber()
+  @IsOptional()
+  phone?: string;
+
+  @IsDateString()
+  @IsOptional()
+  birth_date?: string;
+
+  @IsEnum(['M', 'F', 'O'])
+  @IsOptional()
+  gender?: string;
+}
+
+export class UpdatePersonDto extends PartialType(CreatePersonDto) {
+  @IsOptional()
+  @IsBoolean()
+  is_active?: boolean;
+}
+
+export class BulkCreatePersonDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreatePersonDto)
+  persons: CreatePersonDto[];
+
+  @IsOptional()
+  @IsBoolean()
+  skip_duplicates?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  validate_only?: boolean;
+}
+
+5. 🎯 RESPUESTAS ESTANDARIZADAS
+Interfaces de Respuesta
+
+// Respuesta estándar para éxito
+export interface ApiResponse<T = any> {
+  success: boolean;
+  message: string;
+  data?: T;
+  meta?: {
+    timestamp: string;
+    operation: string;
+    version: string;
+    requestId: string;
+  };
+  errors?: ValidationError[];
+}
+
+// Respuesta para listas paginadas
+export interface PaginatedResponse<T> {
+  success: boolean;
+  message: string;
+  data: {
+    items: T[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+    filters?: Record<string, any>;
+    sorting?: {
+      field: string;
+      direction: 'asc' | 'desc';
+    };
+  };
+  meta: {
+    timestamp: string;
+    operation: string;
+    version: string;
+    requestId: string;
+  };
+}
+
+// Respuesta para operaciones masivas
+export interface BulkOperationResponse {
+  success: boolean;
+  message: string;
+  data: {
+    total: number;
+    successful: number;
+    failed: number;
+    results: {
+      successful: Array<{ id: number; data: any }>;
+      failed: Array<{ data: any; errors: string[] }>;
+    };
+  };
+  meta: {
+    timestamp: string;
+    operation: string;
+    version: string;
+    requestId: string;
+  };
+}
+
+6. 🔍 SISTEMA DE BÚSQUEDA AVANZADO
+Filtros y Búsqueda
+export class PersonFiltersDto {
+  @IsOptional()
+  @IsString()
+  search?: string; // Búsqueda en nombre, documento, email
+
+  @IsOptional()
+  @IsArray()
+  @IsEnum(PersonStatus, { each: true })
+  status?: PersonStatus[];
+
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  roles?: number[];
+
+  @IsOptional()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  residential_units?: number[];
+
+  @IsOptional()
+  @IsDateString()
+  created_after?: string;
+
+  @IsOptional()
+  @IsDateString()
+  created_before?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  has_vehicles?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  has_roles?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+}
+
+export class PersonSortDto {
+  @IsOptional()
+  @IsEnum(['full_name', 'created_at', 'updated_at', 'document_number'])
+  field?: string;
+
+  @IsOptional()
+  @IsEnum(['asc', 'desc'])
+  direction?: 'asc' | 'desc';
+}
+
+7. �� SISTEMA DE AUDITORÍA MEJORADO
+Modelo de Auditoría
+model audit_log {
+  id              Int             @id @default(autoincrement())
+  table_name      String
+  record_id       Int
+  operation       String          // CREATE, UPDATE, DELETE, RESTORE
+  old_values      Json?
+  new_values      Json?
+  changed_fields  String[]
+  user_id         Int?
+  ip_address      String?
+  user_agent      String?
+  created_at      DateTime        @default(now())
+  
+  user            person?         @relation(fields: [user_id], references: [id])
+  
+  @@index([table_name, record_id])
+  @@index([operation])
+  @@index([created_at])
+  @@index([user_id])
+}
+
+8. 🚀 ENDPOINTS MEJORADOS
+API Completa y Robusta
+
+// Gestión de Personas
+GET    /api/v1/persons                    // Listar con filtros avanzados
+GET    /api/v1/persons/:id                // Obtener con relaciones
+POST   /api/v1/persons                    // Crear con validación
+PUT    /api/v1/persons/:id                // Actualizar completo
+PATCH  /api/v1/persons/:id                // Actualizar parcial
+DELETE /api/v1/persons/:id                // Soft delete
+POST   /api/v1/persons/:id/restore        // Restaurar
+
+// Operaciones Masivas
+POST   /api/v1/persons/bulk               // Crear múltiples
+PUT    /api/v1/persons/bulk               // Actualizar múltiples
+DELETE /api/v1/persons/bulk               // Eliminar múltiples
+POST   /api/v1/persons/import             // Importar CSV/Excel
+GET    /api/v1/persons/export             // Exportar CSV/Excel
+
+// Validación y Verificación
+POST   /api/v1/persons/validate           // Validar datos
+GET    /api/v1/persons/duplicates         // Detectar duplicados
+POST   /api/v1/persons/:id/verify         // Verificar usuario
+POST   /api/v1/persons/:id/verify-email   // Verificar email
+POST   /api/v1/persons/:id/verify-phone   // Verificar teléfono
+
+// Gestión de Roles
+GET    /api/v1/persons/:id/roles          // Roles del usuario
+POST   /api/v1/persons/:id/roles          // Asignar rol
+PUT    /api/v1/persons/:id/roles/:roleId  // Actualizar rol
+DELETE /api/v1/persons/:id/roles/:roleId  // Remover rol
+POST   /api/v1/persons/bulk-roles         // Asignar roles masivamente
+
+// Búsqueda y Filtros
+GET    /api/v1/persons/search             // Búsqueda avanzada
+GET    /api/v1/persons/autocomplete       // Autocompletado
+GET    /api/v1/persons/filters            // Obtener filtros disponibles
+
+// Reportes y Estadísticas
+GET    /api/v1/persons/stats              // Estadísticas generales
+GET    /api/v1/persons/stats/by-role      // Por rol
+GET    /api/v1/persons/stats/by-status    // Por estado
+GET    /api/v1/persons/reports            // Reportes
+
+// Auditoría
+GET    /api/v1/persons/:id/audit          // Historial de cambios
+GET    /api/v1/audit/persons              // Auditoría general
+GET    /api/v1/audit/export               // Exportar auditoría
+
+// Gestión de Archivos
+POST   /api/v1/persons/:id/photo          // Subir foto
+DELETE /api/v1/persons/:id/photo          // Eliminar foto
+POST   /api/v1/persons/:id/documents      // Subir documentos
+GET    /api/v1/persons/:id/documents      // Listar documentos
+DELETE /api/v1/persons/:id/documents/:id  // Eliminar documento
+
+
+9. 🔧 MIDDLEWARE Y UTILIDADES
+Middleware Esenciales
+// Middleware de autenticación
+export const authMiddleware = async (req, res, next) => {
+  // Validar JWT token
+  // Verificar permisos
+  // Agregar usuario al request
+};
+
+// Middleware de validación
+export const validationMiddleware = (schema: any) => {
+  return async (req, res, next) => {
+    // Validar request body
+    // Sanitizar datos
+    // Manejar errores de validación
+  };
+};
+
+// Middleware de auditoría
+export const auditMiddleware = (operation: string) => {
+  return async (req, res, next) => {
+    // Registrar operación
+    // Guardar cambios
+    // Agregar metadata
+  };
+};
+
+// Middleware de rate limiting
+export const rateLimitMiddleware = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // máximo 100 requests por ventana
+  message: 'Demasiadas requests desde esta IP'
+});
+
+// Middleware de manejo de errores
+export const errorHandler = (err, req, res, next) => {
+  // Log del error
+  // Respuesta estandarizada
+  // Notificación si es crítico
+};
+
+10. 📱 PREPARACIÓN PARA FRONTEND
+Configuración CORS
+
+// Configuración CORS para frontend
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:4200',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
+
+Headers para Frontend
+
+// Headers de seguridad
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+}));
+
+🎯 PLAN DE IMPLEMENTACIÓN MEJORADO
+Fase 1: Base Robusta (Semana 1)
+✅ Estructura de carpetas Clean Architecture
+✅ Modelos mejorados con campos adicionales
+✅ Sistema de validación robusto
+✅ Middleware esenciales
+✅ Respuestas estandarizadas
+Fase 2: CRUD Completo (Semana 2)
+✅ CRUD individual con validaciones
+✅ Operaciones masivas
+✅ Importación/Exportación CSV
+✅ Sistema de auditoría
+✅ Manejo de errores
+Fase 3: Funcionalidades Avanzadas (Semana 3)
+✅ Búsqueda y filtros avanzados
+✅ Sistema de roles y permisos
+✅ Reportes y estadísticas
+✅ Gestión de archivos
+✅ Notificaciones
+Fase 4: Optimización y Testing (Semana 4)
+✅ Tests unitarios y de integración
+✅ Optimización de performance
+✅ Documentación de API
+✅ Configuración para producción
+✅ Preparación para frontend

@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
   output   = "../generated/prisma"
@@ -20,18 +23,64 @@ model person {
   notes           String?
   alias           String?        @db.VarChar
   is_active       Boolean        @default(true)
+  
+  // Campos para autenticación
+  username        String?        @unique @db.VarChar
+  password_hash   String?        @db.VarChar
+  last_login      DateTime?
+  login_attempts  Int            @default(0)
+  locked_until    DateTime?
+  
+  // Campos para UX
+  status          PersonStatus   @default(ACTIVE)
+  priority        Int            @default(0)
+  tags            String[]       // Para categorización
+  
+  // Campos para internacionalización
+  language        String         @default("es") @db.VarChar
+  timezone        String         @default("America/Bogota") @db.VarChar
+  
+  // Campos para notificaciones
+  notification_preferences Json? // Preferencias de notificación
+  
+  // Campos para validación
+  email_verified  Boolean        @default(false)
+  phone_verified  Boolean        @default(false)
+  document_verified Boolean      @default(false)
+  
+  // Campos para auditoría mejorada
+  verified_by     Int?
+  verified_at     DateTime?
+  
+  // Campos de auditoría
   created_at      DateTime?      @default(now()) @db.Timestamp(6)
   updated_at      DateTime?      @default(now()) @updatedAt @db.Timestamp(6)
   created_by      Int?
   updated_by      Int?
   deleted_at      DateTime?      @db.Timestamp(6)
+  
+  // Relaciones
   person_email    person_email[]
   person_image    person_image[]
   person_phone    person_phone[]
   person_role     person_role[]
   vehicle         vehicle[]
+  user_session    user_session[]
+  audit_log       audit_log[]    @relation("AuditLogUser")
 
   @@index([full_name], map: "idx_person_full_name")
+  @@index([status])
+  @@index([priority])
+  @@index([created_at])
+  @@index([username])
+}
+
+enum PersonStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+  BLOCKED
 }
 
 model person_email {
@@ -336,4 +385,48 @@ model common_area_image {
   common_area common_area @relation(fields: [area_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([area_id, image_url])
+}
+
+/// Sistema de autenticación robusto
+model user_session {
+  id              String          @id @default(cuid())
+  person_id       Int
+  token           String          @unique
+  refresh_token   String          @unique
+  device_info     Json?
+  ip_address      String?
+  user_agent      String?
+  expires_at      DateTime
+  created_at      DateTime        @default(now())
+  last_activity   DateTime        @default(now())
+  is_active       Boolean         @default(true)
+  
+  person          person          @relation(fields: [person_id], references: [id])
+  
+  @@index([person_id])
+  @@index([expires_at])
+  @@index([token])
+  @@index([refresh_token])
+}
+
+/// Sistema de auditoría mejorado
+model audit_log {
+  id              Int             @id @default(autoincrement())
+  table_name      String
+  record_id       Int
+  operation       String          // CREATE, UPDATE, DELETE, RESTORE
+  old_values      Json?
+  new_values      Json?
+  changed_fields  String[]
+  user_id         Int?
+  ip_address      String?
+  user_agent      String?
+  created_at      DateTime        @default(now())
+  
+  user            person?         @relation("AuditLogUser", fields: [user_id], references: [id])
+  
+  @@index([table_name, record_id])
+  @@index([operation])
+  @@index([created_at])
+  @@index([user_id])
 }
