@@ -1,0 +1,511 @@
+1. Person
+Representa a cualquier persona que interactúa con la unidad residencial.
+id (int, PK): Identificador único.
+document_type (string): Tipo de documento (CC, CE, etc.).
+document_number (string, único): Número del documento de identidad.
+full_name (string): Nombre completo.
+gender (string, opcional): Género.
+emails (array de string, opcional): Correos electrónicos.
+phones (array de string, opcional): Números de teléfono.
+photo_url (string, opcional): URL de la foto de perfil.
+birth_date (date, opcional): Fecha de nacimiento.
+notes (text, opcional): Notas adicionales.
+alias (string, opcional): Nombre alternativo.
+images (array de string, opcional): Imágenes asociadas.
+is_active (boolean): Si la persona está activa en el sistema.
+created_at (datetime): Fecha de creación del registro.
+updated_at (datetime): Última fecha de actualización.
+
+2. Role
+Catálogo de roles posibles.
+id (int, PK): Identificador único.
+name (string): Nombre del rol (ej. "Vigilante").
+description (string, opcional): Descripción del rol.
+alias (string, opcional): Nombre alternativo o simplificado.
+is_active (boolean): Estado del rol.
+
+3. PersonRole
+Relación entre una persona y sus roles dinámicos.
+id (int, PK): Identificador único.
+person_id (FK a Person): Persona relacionada.
+role_id (FK a Role): Rol asignado.
+apartment_id (FK opcional a Apartment): Apartamento relacionado (si aplica).
+residential_unit_id (FK opcional a ResidentialUnit): Unidad residencial (si aplica).
+is_active (boolean): Si la relación está activa.
+from_date (date): Fecha de inicio del rol.
+to_date (date, opcional): Fecha de finalización.
+
+4. Permission
+Catálogo de acciones o funcionalidades del sistema.
+id (int, PK): Identificador único.
+code (string, único): Código del permiso (ej. "view_visits").
+description (string): Descripción de la acción que permite.
+is_active (boolean): Si está disponible en el sistema.
+
+5. RolePermission
+Relación muchos a muchos entre roles y permisos.
+id (int, PK): Identificador único.
+role_id (FK a Role): Rol relacionado.
+permission_id (FK a Permission): Permiso relacionado.
+
+6. ResidentialUnit
+Información general de la unidad residencial.
+id (int, PK): Identificador único.
+name (string): Nombre de la unidad residencial.
+address (string): Dirección física.
+tax_id (string, opcional): NIT o identificación tributaria.
+phones (array de string, opcional): Teléfonos de contacto.
+emails (array de string, opcional): Correos de contacto.
+alias (string, opcional): Nombre alternativo.
+images (array de string, opcional): Galería de imágenes.
+documents (array de objetos): Documentos institucionales: tipo + url + descripción.
+is_active (boolean): Estado de la unidad.
+
+7. Tower
+Torre o bloque dentro de la unidad.
+id (int, PK): Identificador único.
+residential_unit_id (FK a ResidentialUnit): Unidad a la que pertenece.
+name (string): Nombre o código.
+floor_count (int): Número de pisos.
+alias (string, opcional): Nombre alternativo.
+images (array de string, opcional): Imágenes del edificio.
+is_active (boolean): Estado de la torre.
+
+8. Floor
+Piso dentro de una torre.
+id (int, PK): Identificador único.
+tower_id (FK a Tower): Torre a la que pertenece.
+number (int): Número del piso.
+alias (string, opcional): Nombre alternativo.
+is_active (boolean): Estado del piso.
+
+9. Apartment
+Representa un apartamento.
+id (int, PK): Identificador único.
+floor_id (FK a Floor): Piso correspondiente.
+tower_id (FK redundante a Tower): Torre relacionada.
+code (string, único): Código del apartamento (ej. A501).
+area_m2 (decimal, opcional): Área en metros cuadrados.
+occupancy_status (string): ocupado / vacio.
+ownership_status (string): en_venta / en_alquiler / ninguno.
+is_habitable (boolean): Si se encuentra habitable actualmente.
+description (text, opcional): Descripción adicional.
+alias (string, opcional): Nombre alternativo.
+images (array de string, opcional): Imágenes del apartamento.
+is_active (boolean): Estado general.
+
+10. ParkingZone
+Zona o grupo de parqueaderos.
+id (int, PK): Identificador único.
+residential_unit_id (FK a ResidentialUnit): Unidad correspondiente.
+name (string): Nombre de la zona.
+description (string, opcional): Descripción general.
+alias (string, opcional): Nombre alternativo.
+image_url (string, opcional): Imagen representativa.
+is_active (boolean): Estado de la zona.
+
+11. Parking
+Espacio individual de parqueo.
+id (int, PK): Identificador único.
+zone_id (FK a ParkingZone): Zona correspondiente.
+number (string): Número del parqueadero.
+is_assigned (boolean): Si está asignado a alguien.
+apartment_id (FK opcional a Apartment): Apartamento asociado.
+alias (string, opcional): Nombre alternativo.
+image_url (string, opcional): Imagen del espacio.
+is_active (boolean): Estado del parqueadero.
+
+12. Vehicle
+Vehículo de una persona.
+id (int, PK): Identificador único.
+person_id (FK a Person): Dueño del vehículo.
+type (string): carro / moto.
+plate (string, único): Placa del vehículo.
+color (string): Color del vehículo.
+brand (string): Marca.
+model (string): Modelo o año.
+photo_url (string, opcional): Imagen del vehículo.
+alias (string, opcional): Nombre alternativo.
+is_active (boolean): Estado.
+
+13. CommonArea
+Zonas comunes disponibles en la unidad.
+id (int, PK): Identificador único.
+residential_unit_id (FK a ResidentialUnit): Unidad a la que pertenece.
+name (string): Nombre del espacio (ej. Piscina).
+type (string): piscina / gimnasio / salón social / etc.
+capacity (int): Aforo máximo permitido.
+location (string): Ubicación exacta o referencia.
+requires_reservation (boolean): Si necesita reserva previa.
+schedule (string, opcional): Horario de uso.
+description (text, opcional): Detalles adicionales.
+images (array de string, opcional): Galería de imágenes.
+alias (string, opcional): Nombre alternativo.
+is_active (boolean): Estado del área.
+
+Modelo de Datos Mejorado con Buenas Prácticas
+
+1. person
+Representa a cualquier persona que interactúa con la unidad residencial.
+id (int, PK)
+
+
+document_type (varchar)
+
+
+document_number (varchar, UNIQUE)
+
+
+full_name (varchar)
+
+
+gender (varchar, NULLABLE)
+
+
+photo_url (varchar, NULLABLE)
+
+
+birth_date (date, NULLABLE)
+
+
+notes (text, NULLABLE)
+
+
+alias (varchar, NULLABLE)
+
+
+is_active (boolean)
+
+
+created_at (timestamp)
+
+
+updated_at (timestamp)
+
+
+Relaciones:
+person_email(person_id, email)
+
+
+person_phone(person_id, phone)
+
+
+person_image(person_id, image_url)
+
+
+
+2. role
+Catálogo de roles posibles.
+id (int, PK)
+
+
+name (varchar)
+
+
+description (text, NULLABLE)
+
+
+alias (varchar, NULLABLE)
+
+
+is_active (boolean)
+
+
+
+3. person_role
+Relación entre una persona y sus roles.
+id (int, PK)
+
+
+person_id (FK -> person.id)
+
+
+role_id (FK -> role.id)
+
+
+apartment_id (FK -> apartment.id, NULLABLE)
+
+
+residential_unit_id (FK -> residential_unit.id, NULLABLE)
+
+
+is_active (boolean)
+
+
+from_date (date)
+
+
+to_date (date, NULLABLE)
+
+
+
+4. permission
+Catálogo de acciones del sistema.
+id (int, PK)
+
+
+code (varchar, UNIQUE)
+
+
+description (text)
+
+
+is_active (boolean)
+
+
+
+5. role_permission
+Relación entre roles y permisos.
+id (int, PK)
+
+
+role_id (FK -> role.id)
+
+
+permission_id (FK -> permission.id)
+
+
+is_active (boolean)
+
+
+
+6. residential_unit
+Datos de la unidad residencial.
+id (int, PK)
+
+
+name (varchar)
+
+
+address (varchar)
+
+
+tax_id (varchar, NULLABLE)
+
+
+alias (varchar, NULLABLE)
+
+
+is_active (boolean)
+
+
+Relaciones:
+residential_unit_phone(unit_id, phone)
+
+
+residential_unit_email(unit_id, email)
+
+
+residential_unit_image(unit_id, image_url)
+
+
+residential_unit_document(unit_id, type, url, description)
+
+
+
+7. tower
+Bloque o torre.
+id (int, PK)
+
+
+residential_unit_id (FK -> residential_unit.id)
+
+
+name (varchar)
+
+
+floor_count (int)
+
+
+alias (varchar, NULLABLE)
+
+
+is_active (boolean)
+
+
+Relaciones:
+tower_image(tower_id, image_url)
+
+
+
+8. floor
+Piso dentro de una torre.
+id (int, PK)
+
+
+tower_id (FK -> tower.id)
+
+
+number (int)
+
+
+alias (varchar, NULLABLE)
+
+
+is_active (boolean)
+
+
+
+9. apartment
+Representa un apartamento.
+id (int, PK)
+
+
+floor_id (FK -> floor.id)
+
+
+tower_id (FK -> tower.id)
+
+
+code (varchar, UNIQUE)
+
+
+area_m2 (decimal, NULLABLE)
+
+
+occupancy_status (varchar)
+
+
+ownership_status (varchar)
+
+
+is_habitable (boolean)
+
+
+description (text, NULLABLE)
+
+
+alias (varchar, NULLABLE)
+
+
+is_active (boolean)
+
+
+Relaciones:
+apartment_image(apartment_id, image_url)
+
+
+
+10. parking_zone
+Grupo de parqueaderos.
+id (int, PK)
+
+
+residential_unit_id (FK -> residential_unit.id)
+
+
+name (varchar)
+
+
+description (text, NULLABLE)
+
+
+alias (varchar, NULLABLE)
+
+
+image_url (varchar, NULLABLE)
+
+
+is_active (boolean)
+
+
+
+11. parking
+Espacio individual.
+id (int, PK)
+
+
+zone_id (FK -> parking_zone.id)
+
+
+number (varchar)
+
+
+is_assigned (boolean)
+
+
+apartment_id (FK -> apartment.id, NULLABLE)
+
+
+alias (varchar, NULLABLE)
+
+
+image_url (varchar, NULLABLE)
+
+
+is_active (boolean)
+
+
+
+12. vehicle
+Vehículo de una persona.
+id (int, PK)
+
+
+person_id (FK -> person.id)
+
+
+type (varchar)
+
+
+plate (varchar, UNIQUE)
+
+
+color (varchar)
+
+
+brand (varchar)
+
+
+model (varchar)
+
+
+photo_url (varchar, NULLABLE)
+
+
+alias (varchar, NULLABLE)
+
+
+is_active (boolean)
+
+
+
+13. common_area
+Zonas comunes.
+id (int, PK)
+
+
+residential_unit_id (FK -> residential_unit.id)
+
+
+name (varchar)
+
+
+type (varchar)
+
+
+capacity (int)
+
+
+location (varchar)
+
+
+requires_reservation (boolean)
+
+
+schedule (varchar, NULLABLE)
+
+
+description (text, NULLABLE)
+
+
+alias (varchar, NULLABLE)
+
+
+is_active (boolean)
+
+
+Relaciones:
+common_area_image(area_id, image_url)
+
+

@@ -1,0 +1,339 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Representa a cualquier persona que interactúa con la unidad residencial.
+model person {
+  id              Int            @id @default(autoincrement())
+  document_type   String         @db.VarChar
+  document_number String         @unique @db.VarChar
+  full_name       String         @db.VarChar
+  gender          String?        @db.VarChar
+  photo_url       String?        @db.VarChar
+  birth_date      DateTime?      @db.Date
+  notes           String?
+  alias           String?        @db.VarChar
+  is_active       Boolean        @default(true)
+  created_at      DateTime?      @default(now()) @db.Timestamp(6)
+  updated_at      DateTime?      @default(now()) @updatedAt @db.Timestamp(6)
+  created_by      Int?
+  updated_by      Int?
+  deleted_at      DateTime?      @db.Timestamp(6)
+  person_email    person_email[]
+  person_image    person_image[]
+  person_phone    person_phone[]
+  person_role     person_role[]
+  vehicle         vehicle[]
+
+  @@index([full_name], map: "idx_person_full_name")
+}
+
+model person_email {
+  person_id Int
+  email     String @db.VarChar
+  person    person @relation(fields: [person_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([person_id, email])
+}
+
+model person_phone {
+  person_id Int
+  phone     String @db.VarChar
+  person    person @relation(fields: [person_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([person_id, phone])
+}
+
+model person_image {
+  person_id Int
+  image_url String @db.VarChar
+  person    person @relation(fields: [person_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([person_id, image_url])
+}
+
+/// Catálogo de roles posibles.
+model role {
+  id              Int               @id @default(autoincrement())
+  name            String            @db.VarChar
+  description     String?
+  alias           String?           @db.VarChar
+  is_active       Boolean           @default(true)
+  created_by      Int?
+  updated_by      Int?
+  deleted_at      DateTime?         @db.Timestamp(6)
+  person_role     person_role[]
+  role_permission role_permission[]
+
+  @@index([name], map: "idx_role_name")
+}
+
+/// Relación entre una persona y sus roles dinámicos.
+model person_role {
+  id                  Int               @id @default(autoincrement())
+  person_id           Int?
+  role_id             Int?
+  apartment_id        Int?
+  residential_unit_id Int?
+  is_active           Boolean           @default(true)
+  from_date           DateTime          @db.Date
+  to_date             DateTime?         @db.Date
+  created_by          Int?
+  updated_by          Int?
+  deleted_at          DateTime?         @db.Timestamp(6)
+  apartment           apartment?        @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  person              person?           @relation(fields: [person_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  residential_unit    residential_unit? @relation(fields: [residential_unit_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  role                role?             @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// Catálogo de acciones o funcionalidades del sistema.
+model permission {
+  id              Int               @id @default(autoincrement())
+  code            String            @unique @db.VarChar
+  description     String
+  is_active       Boolean           @default(true)
+  created_by      Int?
+  updated_by      Int?
+  deleted_at      DateTime?         @db.Timestamp(6)
+  role_permission role_permission[]
+
+  @@index([code], map: "idx_permission_code")
+}
+
+/// Relación muchos a muchos entre roles y permisos.
+model role_permission {
+  id            Int         @id @default(autoincrement())
+  role_id       Int?
+  permission_id Int?
+  is_active     Boolean     @default(true)
+  created_by    Int?
+  updated_by    Int?
+  deleted_at    DateTime?   @db.Timestamp(6)
+  permission    permission? @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  role          role?       @relation(fields: [role_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// Información general de la unidad residencial.
+model residential_unit {
+  id                        Int                         @id @default(autoincrement())
+  name                      String                      @db.VarChar
+  address                   String                      @db.VarChar
+  tax_id                    String?                     @db.VarChar
+  alias                     String?                     @db.VarChar
+  is_active                 Boolean                     @default(true)
+  created_by                Int?
+  updated_by                Int?
+  deleted_at                DateTime?                   @db.Timestamp(6)
+  common_area               common_area[]
+  parking_zone              parking_zone[]
+  person_role               person_role[]
+  residential_unit_document residential_unit_document[]
+  residential_unit_email    residential_unit_email[]
+  residential_unit_image    residential_unit_image[]
+  residential_unit_phone    residential_unit_phone[]
+  tower                     tower[]
+
+  @@index([name], map: "idx_residential_unit_name")
+}
+
+model residential_unit_document {
+  unit_id          Int
+  type             String           @db.VarChar
+  url              String           @db.VarChar
+  description      String?
+  residential_unit residential_unit @relation(fields: [unit_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([unit_id, type, url])
+}
+
+model residential_unit_email {
+  unit_id          Int
+  email            String           @db.VarChar
+  residential_unit residential_unit @relation(fields: [unit_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([unit_id, email])
+}
+
+model residential_unit_image {
+  unit_id          Int
+  image_url        String           @db.VarChar
+  residential_unit residential_unit @relation(fields: [unit_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([unit_id, image_url])
+}
+
+model residential_unit_phone {
+  unit_id          Int
+  phone            String           @db.VarChar
+  residential_unit residential_unit @relation(fields: [unit_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([unit_id, phone])
+}
+
+/// Torre o bloque dentro de la unidad.
+model tower {
+  id                  Int               @id @default(autoincrement())
+  residential_unit_id Int?
+  name                String            @db.VarChar
+  floor_count         Int
+  alias               String?           @db.VarChar
+  is_active           Boolean           @default(true)
+  created_by          Int?
+  updated_by          Int?
+  deleted_at          DateTime?         @db.Timestamp(6)
+  apartment           apartment[]
+  floor               floor[]
+  residential_unit    residential_unit? @relation(fields: [residential_unit_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tower_image         tower_image[]
+
+  @@index([name], map: "idx_tower_name")
+}
+
+model tower_image {
+  tower_id  Int
+  image_url String @db.VarChar
+  tower     tower  @relation(fields: [tower_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([tower_id, image_url])
+}
+
+/// Piso dentro de una torre.
+model floor {
+  id         Int         @id @default(autoincrement())
+  tower_id   Int?
+  number     Int
+  alias      String?     @db.VarChar
+  is_active  Boolean     @default(true)
+  created_by Int?
+  updated_by Int?
+  deleted_at DateTime?   @db.Timestamp(6)
+  apartment  apartment[]
+  tower      tower?      @relation(fields: [tower_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+/// Representa un apartamento.
+model apartment {
+  id               Int               @id @default(autoincrement())
+  floor_id         Int?
+  tower_id         Int?
+  code             String            @unique @db.VarChar
+  area_m2          Decimal?          @db.Decimal
+  occupancy_status String            @db.VarChar
+  ownership_status String            @db.VarChar
+  is_habitable     Boolean           @default(true)
+  description      String?
+  alias            String?           @db.VarChar
+  is_active        Boolean           @default(true)
+  created_by       Int?
+  updated_by       Int?
+  deleted_at       DateTime?         @db.Timestamp(6)
+  floor            floor?            @relation(fields: [floor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tower            tower?            @relation(fields: [tower_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  apartment_image  apartment_image[]
+  parking          parking[]
+  person_role      person_role[]
+
+  @@index([code], map: "idx_apartment_code")
+}
+
+model apartment_image {
+  apartment_id Int
+  image_url    String    @db.VarChar
+  apartment    apartment @relation(fields: [apartment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([apartment_id, image_url])
+}
+
+/// Zona o grupo de parqueaderos.
+model parking_zone {
+  id                  Int               @id @default(autoincrement())
+  residential_unit_id Int?
+  name                String            @db.VarChar
+  description         String?
+  alias               String?           @db.VarChar
+  image_url           String?           @db.VarChar
+  is_active           Boolean           @default(true)
+  created_by          Int?
+  updated_by          Int?
+  deleted_at          DateTime?         @db.Timestamp(6)
+  parking             parking[]
+  residential_unit    residential_unit? @relation(fields: [residential_unit_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([name], map: "idx_parking_zone_name")
+}
+
+/// Espacio individual de parqueo.
+model parking {
+  id           Int           @id @default(autoincrement())
+  zone_id      Int?
+  number       String        @db.VarChar
+  is_assigned  Boolean       @default(false)
+  apartment_id Int?
+  alias        String?       @db.VarChar
+  image_url    String?       @db.VarChar
+  is_active    Boolean       @default(true)
+  created_by   Int?
+  updated_by   Int?
+  deleted_at   DateTime?     @db.Timestamp(6)
+  apartment    apartment?    @relation(fields: [apartment_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  parking_zone parking_zone? @relation(fields: [zone_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([number], map: "idx_parking_number")
+}
+
+/// Vehículo de una persona.
+model vehicle {
+  id         Int       @id @default(autoincrement())
+  person_id  Int?
+  type       String    @db.VarChar
+  plate      String    @unique @db.VarChar
+  color      String    @db.VarChar
+  brand      String    @db.VarChar
+  model      String    @db.VarChar
+  photo_url  String?   @db.VarChar
+  alias      String?   @db.VarChar
+  is_active  Boolean   @default(true)
+  created_by Int?
+  updated_by Int?
+  deleted_at DateTime? @db.Timestamp(6)
+  person     person?   @relation(fields: [person_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([plate], map: "idx_vehicle_plate")
+}
+
+/// Zonas comunes disponibles en la unidad.
+model common_area {
+  id                   Int                 @id @default(autoincrement())
+  residential_unit_id  Int?
+  name                 String              @db.VarChar
+  type                 String              @db.VarChar
+  capacity             Int
+  location             String              @db.VarChar
+  requires_reservation Boolean             @default(false)
+  schedule             String?             @db.VarChar
+  description          String?
+  alias                String?             @db.VarChar
+  is_active            Boolean             @default(true)
+  created_by           Int?
+  updated_by           Int?
+  deleted_at           DateTime?           @db.Timestamp(6)
+  residential_unit     residential_unit?   @relation(fields: [residential_unit_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  common_area_image    common_area_image[]
+
+  @@index([name], map: "idx_common_area_name")
+}
+
+model common_area_image {
+  area_id     Int
+  image_url   String      @db.VarChar
+  common_area common_area @relation(fields: [area_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([area_id, image_url])
+}
