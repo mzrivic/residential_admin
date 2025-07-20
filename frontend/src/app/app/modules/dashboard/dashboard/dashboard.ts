@@ -1,7 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
+import { AuthService, User } from '../../../core/auth/auth.service';
+import confetti from 'canvas-confetti';
 
 // Interfaces
 interface DashboardStats {
@@ -26,7 +29,8 @@ interface QuickAction {
   imports: [
     CommonModule,
     RouterModule,
-    FormsModule
+    FormsModule,
+    HttpClientModule
   ],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
@@ -86,12 +90,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // Loading state
   loading = true;
   
-  constructor() {}
+  // Usuario actual
+  currentUser: User | null = null;
+  
+  // Estado de notificación
+  showNotification = false;
+  notificationMessage = '';
+  notificationType = 'success';
+  
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
   
   ngOnInit(): void {
     this.loadThemePreference();
     this.loadDashboardData();
     this.applyTheme();
+    this.loadCurrentUser();
   }
   
   ngOnDestroy(): void {
@@ -187,6 +203,133 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // Contrae el sidebar automáticamente al navegar
     if (!this.sidebarCollapsed) {
       this.sidebarCollapsed = true;
+    }
+  }
+
+  /**
+   * Carga el usuario actual
+   */
+  private loadCurrentUser(): void {
+    this.currentUser = this.authService.getCurrentUser();
+  }
+
+  /**
+   * Muestra una notificación temporal
+   */
+  private showTemporaryNotification(message: string, type: 'success' | 'error' = 'success'): void {
+    this.notificationMessage = message;
+    this.notificationType = type;
+    this.showNotification = true;
+    
+    // Ocultar después de 3 segundos
+    setTimeout(() => {
+      this.showNotification = false;
+    }, 3000);
+  }
+
+  /**
+   * Efecto de confeti al cerrar sesión
+   */
+  private triggerLogoutConfetti(): void {
+    // Efecto de confeti desde el centro
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3']
+    });
+
+    // Efecto adicional después de 500ms
+    setTimeout(() => {
+      confetti({
+        particleCount: 50,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: ['#ff6b6b', '#4ecdc4', '#45b7d1']
+      });
+    }, 500);
+
+    // Efecto final después de 1000ms
+    setTimeout(() => {
+      confetti({
+        particleCount: 50,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: ['#96ceb4', '#feca57', '#ff9ff3']
+      });
+    }, 1000);
+  }
+
+  /**
+   * Cierra la sesión del usuario
+   */
+  async logout(): Promise<void> {
+    try {
+      console.log('Logging out...');
+      
+      // Llamar al servicio de logout
+      this.authService.logout().subscribe({
+        next: (response) => {
+          console.log('Logout successful:', response.message);
+          
+          // Contrae el sidebar
+          this.sidebarCollapsed = true;
+          
+          // Limpiar usuario actual
+          this.currentUser = null;
+          
+          // Mostrar notificación
+          this.showTemporaryNotification('¡Sesión cerrada exitosamente! 🎉', 'success');
+          
+          // Efecto de confeti
+          this.triggerLogoutConfetti();
+          
+          // Redirigir al login después de 2 segundos
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 2000);
+        },
+        error: (error) => {
+          console.error('Error during logout:', error);
+          
+          // Si falla la API, hacer logout local
+          this.authService.logoutLocal();
+          this.currentUser = null;
+          this.sidebarCollapsed = true;
+          
+          // Mostrar notificación
+          this.showTemporaryNotification('Sesión cerrada localmente', 'success');
+          
+          // Efecto de confeti
+          this.triggerLogoutConfetti();
+          
+          // Redirigir al login después de 2 segundos
+          setTimeout(() => {
+            this.router.navigate(['/login']);
+          }, 2000);
+        }
+      });
+      
+    } catch (error) {
+      console.error('Error during logout:', error);
+      
+      // Fallback: logout local
+      this.authService.logoutLocal();
+      this.currentUser = null;
+      this.sidebarCollapsed = true;
+      
+      // Mostrar notificación
+      this.showTemporaryNotification('Error al cerrar sesión', 'error');
+      
+      // Efecto de confeti
+      this.triggerLogoutConfetti();
+      
+      // Redirigir al login después de 2 segundos
+      setTimeout(() => {
+        this.router.navigate(['/login']);
+      }, 2000);
     }
   }
 }
