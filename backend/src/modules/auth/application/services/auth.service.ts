@@ -4,6 +4,35 @@ import crypto from 'crypto';
 import { LoginDto, RegisterDto, RefreshTokenDto, ChangePasswordDto } from '../dto/auth.dto';
 import prisma from '../../../../config/database';
 
+// Clases de error personalizadas
+export class AccountLockedError extends Error {
+  constructor(message: string = 'Cuenta temporalmente bloqueada') {
+    super(message);
+    this.name = 'AccountLockedError';
+  }
+}
+
+export class UserNotFoundError extends Error {
+  constructor(message: string = 'Usuario no encontrado') {
+    super(message);
+    this.name = 'UserNotFoundError';
+  }
+}
+
+export class InvalidPasswordError extends Error {
+  constructor(message: string = 'Contraseña incorrecta') {
+    super(message);
+    this.name = 'InvalidPasswordError';
+  }
+}
+
+export class NoPasswordConfiguredError extends Error {
+  constructor(message: string = 'Contraseña no configurada') {
+    super(message);
+    this.name = 'NoPasswordConfiguredError';
+  }
+}
+
 export class AuthService {
 
   async login(loginData: LoginDto, ipAddress?: string, userAgent?: string) {
@@ -37,17 +66,17 @@ export class AuthService {
       });
 
       if (!user) {
-        throw new Error('Usuario no encontrado');
+        throw new UserNotFoundError();
       }
 
       // Verificar si la cuenta está bloqueada
       if (user.locked_until && user.locked_until > new Date()) {
-        throw new Error('Cuenta temporalmente bloqueada');
+        throw new AccountLockedError();
       }
 
       // Verificar contraseña
       if (!user.password_hash) {
-        throw new Error('Contraseña no configurada');
+        throw new NoPasswordConfiguredError();
       }
 
       const isValidPassword = await bcrypt.compare(loginData.password, user.password_hash);
@@ -61,7 +90,7 @@ export class AuthService {
           }
         });
 
-        throw new Error('Contraseña incorrecta');
+        throw new InvalidPasswordError();
       }
 
       // Resetear intentos de login
@@ -259,13 +288,13 @@ export class AuthService {
       });
 
       if (!user || !user.password_hash) {
-        throw new Error('Usuario no encontrado');
+        throw new UserNotFoundError();
       }
 
       // Verificar contraseña actual
       const isValidCurrentPassword = await bcrypt.compare(changePasswordData.current_password, user.password_hash);
       if (!isValidCurrentPassword) {
-        throw new Error('Contraseña actual incorrecta');
+        throw new InvalidPasswordError();
       }
 
       // Verificar que las nuevas contraseñas coincidan
@@ -311,7 +340,7 @@ export class AuthService {
       });
 
       if (!user) {
-        throw new Error('Usuario no encontrado');
+        throw new UserNotFoundError();
       }
 
       return {

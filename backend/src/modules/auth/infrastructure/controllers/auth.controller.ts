@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { AuthService } from '../../application/services/auth.service';
+import { AuthService, AccountLockedError, UserNotFoundError, InvalidPasswordError, NoPasswordConfiguredError } from '../../application/services/auth.service';
 import { LoginDto, RegisterDto, RefreshTokenDto, ChangePasswordDto, LogoutDto } from '../../application/dto/auth.dto';
 
 export class AuthController {
@@ -29,7 +29,20 @@ export class AuthController {
         }
       });
     } catch (error: any) {
-      res.status(401).json({
+      // Determinar el código de estado HTTP según el tipo de error
+      let statusCode = 401;
+      
+      if (error instanceof AccountLockedError) {
+        statusCode = 423; // Locked
+      } else if (error instanceof UserNotFoundError) {
+        statusCode = 404; // Not Found
+      } else if (error instanceof InvalidPasswordError) {
+        statusCode = 401; // Unauthorized
+      } else if (error instanceof NoPasswordConfiguredError) {
+        statusCode = 400; // Bad Request
+      }
+      
+      res.status(statusCode).json({
         success: false,
         message: error.message || 'Error en el login',
         meta: {

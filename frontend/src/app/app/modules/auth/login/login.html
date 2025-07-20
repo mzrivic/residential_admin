@@ -1,0 +1,228 @@
+<div class="h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4 transition-all duration-1000 relative overflow-hidden">
+  <!-- Efectos de fondo adicionales -->
+  <div class="absolute inset-0 bg-gradient-to-r from-blue-400/10 via-purple-400/10 to-indigo-400/10 dark:from-blue-600/5 dark:via-purple-600/5 dark:to-indigo-600/5 animate-pulse"></div>
+  <div class="absolute top-0 left-0 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
+  <div class="absolute bottom-0 right-0 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+  
+  <!-- Contenedor principal más pequeño -->
+  <div class="w-full max-w-5xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-3xl rounded-3xl shadow-2xl border border-white/40 dark:border-gray-700/40 overflow-hidden relative z-10">
+    <div class="flex h-[500px]">
+      <!-- Lado izquierdo: Hero section mejorado -->
+      <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 relative overflow-hidden">
+        <!-- Patrón de fondo animado -->
+        <div class="absolute inset-0 opacity-20">
+          <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.1%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%222%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] animate-pulse"></div>
+        </div>
+        
+        <!-- Efectos de luz -->
+        <div class="absolute top-0 left-0 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute bottom-0 right-0 w-96 h-96 bg-purple-400/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        
+        <!-- Contenido del hero -->
+        <div class="relative z-10 flex items-center justify-center w-full p-6">
+          <div class="text-center text-white">
+            <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/30 shadow-2xl transform hover:scale-110 transition-all duration-300">
+              <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12,7V3H2V21H22V7H12M6,19H4V17H6V19M6,15H4V13H6V15M6,11H4V9H6V11M6,7H4V5H6V7M10,19H8V17H10V19M10,15H8V13H10V15M10,11H8V9H10V11M10,7H8V5H10V7M20,19H12V17H14V15H12V13H14V11H12V9H20V19Z"/>
+              </svg>
+            </div>
+            <h1 class="text-4xl font-bold mb-3 tracking-tight bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+              Residential
+            </h1>
+            <p class="text-lg opacity-90 mb-4">Gestión Residencial Inteligente</p>
+            
+            <!-- Características destacadas -->
+            <div class="space-y-2 text-left max-w-xs mx-auto">
+              <div class="flex items-center space-x-2">
+                <div class="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                <span class="text-xs opacity-80">Gestión completa de residentes</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse delay-300"></div>
+                <span class="text-xs opacity-80">Control de acceso seguro</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse delay-600"></div>
+                <span class="text-xs opacity-80">Reportes en tiempo real</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lado derecho: Formulario -->
+      <div class="flex-1 flex items-center justify-center p-6 lg:p-8">
+        <div class="w-full max-w-md relative">
+          <!-- Header del formulario -->
+          <div class="text-center mb-6 relative">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-1">Bienvenido</h2>
+            <p class="text-gray-600 dark:text-gray-400 text-sm">Ingresa tus credenciales</p>
+            
+            <!-- Botón de cambio de tema con efecto deslizante -->
+            <div class="absolute top-0 right-0">
+              <button 
+                (click)="toggleTheme()" 
+                class="relative w-12 h-12 bg-gray-100 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-full flex items-center justify-center text-gray-600 dark:text-gray-400 hover:shadow-lg transition-all duration-1000 overflow-hidden group"
+                title="Cambiar tema"
+              >
+                <!-- Fondo deslizante -->
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 transform transition-transform duration-1500 ease-in-out"
+                     [class.translate-x-0]="!isDarkTheme"
+                     [class.translate-x-full]="isDarkTheme">
+                </div>
+                
+                <!-- Iconos -->
+                <svg *ngIf="!isDarkTheme" class="relative z-10 w-6 h-6 text-white transition-all duration-1000 transform"
+                     [class.translate-x-0]="!isDarkTheme"
+                     [class.translate-x-12]="isDarkTheme"
+                     fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,2L14.39,5.42C13.65,5.15 12.84,5 12,5C11.16,5 10.35,5.15 9.61,5.42L12,2M3.34,7L7.5,6.65C6.9,7.16 6.36,7.78 5.94,8.5C5.5,9.24 5.25,10 5.11,10.79L3.34,7M3.36,17L5.12,13.23C5.26,14 5.53,14.78 5.95,15.5C6.37,16.24 6.91,16.86 7.5,17.37L3.36,17M20.65,7L18.88,10.79C18.74,10 18.47,9.23 18.05,8.5C17.63,7.78 17.1,7.15 16.5,6.64L20.65,7M20.64,17L16.5,17.36C17.09,16.85 17.62,16.22 18.04,15.5C18.46,14.77 18.73,14 18.87,13.21L20.64,17M12,22L9.59,18.56C10.33,18.83 11.14,19 12,19C12.82,19 13.63,18.83 14.37,18.56L12,22Z"/>
+                </svg>
+                <svg *ngIf="isDarkTheme" class="relative z-10 w-6 h-6 text-white transition-all duration-1000 transform"
+                     [class.translate-x-0]="isDarkTheme"
+                     [class.-translate-x-12]="!isDarkTheme"
+                     fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M17.75,4.09L15.22,6.03L16.13,9.09L13.5,7.28L10.87,9.09L11.78,6.03L9.25,4.09L12.44,4L13.5,1L14.56,4L17.75,4.09M21.25,11L19.61,12.25L20.2,14.23L18.5,13.06L16.8,14.23L17.39,12.25L15.75,11L17.81,10.95L18.5,9L19.19,10.95L21.25,11M18.97,15.95C19.8,15.87 20.69,17.05 20.16,17.8C19.84,18.25 19.5,18.67 19.08,19.07C15.17,23 8.84,23 4.94,19.07C1.03,15.17 1.03,8.83 4.94,4.93C5.34,4.53 5.76,4.17 6.21,3.85C6.96,3.32 8.14,4.21 8.06,5.04C7.79,7.9 8.75,10.87 10.95,13.06C13.14,15.26 16.1,16.22 18.97,15.95M17.33,17.97C14.5,17.81 11.7,16.64 9.53,14.5C7.36,12.31 6.2,9.5 6.04,6.68C3.23,9.82 3.34,14.64 6.35,17.66C9.37,20.67 14.19,20.78 17.33,17.97Z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Formulario -->
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-4">
+            <!-- Campo Usuario -->
+            <div class="group">
+              <label for="username" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-500">
+                Usuario
+              </label>
+              <div class="relative">
+                <input 
+                  id="username"
+                  type="text"
+                  formControlName="username"
+                  class="w-full px-3 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-500 group-hover:border-blue-300 dark:group-hover:border-blue-600"
+                  placeholder="Ingresa tu usuario"
+                  autocomplete="username"
+                  required
+                />
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                  <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors duration-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
+                  </svg>
+                </div>
+              </div>
+              <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M13,17H11V15H13V17M13,13H11V7H13V13Z"/>
+                </svg>
+                {{ getFieldError('username') }}
+              </div>
+            </div>
+
+            <!-- Campo Contraseña -->
+            <div class="group">
+              <label for="password" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-500">
+                Contraseña
+              </label>
+              <div class="relative">
+                <input 
+                  id="password"
+                  [type]="hidePassword ? 'password' : 'text'"
+                  formControlName="password"
+                  class="w-full px-3 py-2.5 pr-12 border-2 border-gray-200 dark:border-gray-700 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all duration-500 group-hover:border-blue-300 dark:group-hover:border-blue-600"
+                  placeholder="Ingresa tu contraseña"
+                  autocomplete="current-password"
+                  required
+                />
+                <button 
+                  type="button"
+                  (click)="hidePassword = !hidePassword"
+                  class="absolute right-3 top-1/2 transform -translate-y-1/2 p-2 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-500"
+                  [attr.aria-label]="hidePassword ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+                >
+                  <svg *ngIf="hidePassword" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/>
+                  </svg>
+                  <svg *ngIf="!hidePassword" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M11.83,9L15,12.16C15,12.11 15,12.05 15,12A3,3 0 0,0 12,9C11.94,9 11.89,9 11.83,9M7.53,9.8L9.08,11.35C9.03,11.56 9,11.77 9,12A3,3 0 0,0 12,15C12.22,15 12.44,14.97 12.65,14.92L14.2,16.47C13.53,16.8 12.79,17 12,17A5,5 0 0,1 7,12C7,11.21 7.2,10.47 7.53,9.8M2,4.27L3.28,3L20.72,20.44L19.44,21.71L15.46,17.73C14.38,18.37 13.23,18.68 12,18.68C7,18.68 2.73,15.55 1,11.12C1.64,9.43 2.58,7.96 3.73,6.73L2,4.27M7.73,6.08L12.64,10.99C12.75,10.96 12.86,10.94 12.96,10.92C12.95,10.97 12.95,11.02 12.95,11.08C12.95,11.18 12.92,11.28 12.88,11.38L16.81,15.31C16.91,15.27 17,15.22 17.08,15.16C17.18,15.1 17.27,15.04 17.35,14.97C17.43,14.9 17.5,14.82 17.56,14.74C17.62,14.66 17.67,14.58 17.71,14.5C17.75,14.42 17.78,14.33 17.8,14.24C17.82,14.15 17.83,14.06 17.83,13.97C17.83,13.88 17.82,13.79 17.8,13.7C17.78,13.61 17.75,13.52 17.71,13.44C17.67,13.36 17.62,13.28 17.56,13.2C17.5,13.12 17.43,13.05 17.35,12.98C17.27,12.91 17.18,12.85 17.08,12.79C17,12.73 16.91,12.68 16.81,12.64L12.88,8.71C12.78,8.67 12.68,8.64 12.58,8.62C12.48,8.6 12.38,8.59 12.28,8.59C12.18,8.59 12.08,8.6 11.98,8.62C11.88,8.64 11.78,8.67 11.68,8.71L7.73,6.08M12,5C7,5 2.73,7.88 1,12.34C2.73,16.8 7,19.66 12,19.66C17,19.66 21.27,16.8 23,12.34C21.27,7.88 17,5 12,5Z"/>
+                  </svg>
+                </button>
+              </div>
+              <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M13,17H11V15H13V17M13,13H11V7H13V13Z"/>
+                </svg>
+                {{ getFieldError('password') }}
+              </div>
+            </div>
+
+            <!-- Opciones del formulario -->
+            <div class="flex items-center justify-between mt-3">
+              <label class="flex items-center cursor-pointer group">
+                <input 
+                  type="checkbox" 
+                  formControlName="rememberMe"
+                  class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 group-hover:border-blue-400 transition-colors duration-200"
+                />
+                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-500">Recordar sesión</span>
+              </label>
+              <a 
+                href="#" 
+                (click)="onForgotPassword($event)"
+                class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline transition-all duration-500 font-medium"
+              >
+                ¿Olvidaste tu contraseña?
+              </a>
+            </div>
+
+            <!-- Botón de login -->
+            <button 
+              type="submit" 
+              [disabled]="loading || loginForm.invalid"
+              class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-500 transform hover:scale-[1.02] disabled:transform-none disabled:cursor-not-allowed shadow-lg hover:shadow-xl relative overflow-hidden group"
+            >
+              <!-- Efecto de brillo -->
+              <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1500"></div>
+              
+              <div class="relative flex items-center justify-center">
+                <div *ngIf="loading" class="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                <span>{{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}</span>
+              </div>
+            </button>
+          </form>
+
+          <!-- Mensajes -->
+          <div *ngIf="success" class="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-center text-green-800 dark:text-green-200 shadow-2xl backdrop-blur-sm">
+            <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M11,16.5L18,9.5L16.59,8.09L11,13.67L7.91,10.59L6.5,12L11,16.5Z"/>
+            </svg>
+            <span class="text-xs font-medium">{{ success }}</span>
+          </div>
+
+          <div *ngIf="error" class="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-sm p-3 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-center text-red-800 dark:text-red-200 shadow-2xl backdrop-blur-sm">
+            <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M13,17H11V15H13V17M13,13H11V7H13V13Z"/>
+            </svg>
+            <span class="text-xs font-medium">{{ error }}</span>
+          </div>
+
+          <!-- Botón de ayuda con nombre -->
+          <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">¿Necesitas ayuda para acceder?</p>
+                          <a 
+                href="https://wa.me/573001234567?text=Hola,%20necesito%20ayuda%20con%20el%20sistema%20residencial" 
+                target="_blank" 
+                class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-500 font-medium"
+                title="Contactar soporte técnico"
+              >
+              <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z"/>
+              </svg>
+              <span>Solicitar Ayuda</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
