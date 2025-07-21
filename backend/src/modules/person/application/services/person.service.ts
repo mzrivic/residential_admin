@@ -1,5 +1,5 @@
 import { CreatePersonDto } from '../dto/create-person.dto';
-import { successResponse, errorResponse, paginatedResponse, notFoundError, duplicateError } from '../../../../shared/utils/response.utils';
+import { successResponse, errorResponse, paginatedResponse, notFoundError, duplicateError, NotFoundException } from '../../../../shared/utils/response.utils';
 import prisma from '../../../../config/database';
 
 export class PersonService {
@@ -335,30 +335,34 @@ export class PersonService {
    */
   async remove(id: number, userId?: number) {
     try {
+      const parsedId = typeof id === 'string' ? parseInt(id) : id;
+      if (!parsedId || isNaN(parsedId)) {
+        throw new NotFoundException(`ID inválido para eliminación`);
+      }
       // Verificar si la persona existe
       const existingPerson = await prisma.person.findFirst({
         where: {
-          id: parseInt(id.toString()),
+          id: parsedId,
           deleted_at: null
         }
       });
 
       if (!existingPerson) {
-        throw new NotFoundException(`Persona con ID ${id} no encontrada`);
+        throw new NotFoundException(`Persona con ID ${parsedId} no encontrada`);
       }
 
       // Soft delete
       await prisma.person.update({
-        where: { id: parseInt(id.toString()) },
+        where: { id: parsedId },
         data: {
           deleted_at: new Date(),
           updated_at: new Date(),
-          updated_by: userId
+          updated_by: userId ?? null
         }
       });
 
       return successResponse(
-        { id: parseInt(id.toString()) },
+        { id: parsedId },
         'Persona eliminada exitosamente',
         'DELETE_PERSON'
       );
@@ -367,7 +371,6 @@ export class PersonService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      
       throw new Error(`Error al eliminar persona: ${error.message}`);
     }
   }

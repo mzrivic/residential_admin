@@ -1,1 +1,16 @@
-<p>header works!</p>
+<header class="w-full bg-white dark:bg-gray-900 shadow-md px-4 py-3 flex items-center justify-between flex-wrap">
+  <div class="flex items-center space-x-3">
+    <span class="font-bold text-xl text-blue-700 dark:text-blue-300">Admin</span>
+  </div>
+  <nav class="flex items-center space-x-4">
+    <a href="/dashboard" class="text-gray-700 dark:text-gray-200 hover:text-blue-600">Dashboard</a>
+    <a href="/dashboard/users" class="text-gray-700 dark:text-gray-200 hover:text-blue-600">Usuarios</a>
+    <a href="/dashboard/roles" class="text-gray-700 dark:text-gray-200 hover:text-blue-600">Roles</a>
+    <a href="/dashboard/reports" class="text-gray-700 dark:text-gray-200 hover:text-blue-600">Reportes</a>
+  </nav>
+  <button class="block lg:hidden ml-4 text-gray-700 dark:text-gray-200 focus:outline-none" aria-label="Abrir menú">
+    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
+</header>

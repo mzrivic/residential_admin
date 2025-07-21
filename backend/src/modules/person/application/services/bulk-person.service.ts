@@ -1,5 +1,5 @@
 import { CreatePersonDto } from '../dto/create-person.dto';
-import { bulkOperationResponse, successResponse, errorResponse } from '../../../../shared/utils/response.utils';
+import { bulkOperationResponse, successResponse, errorResponse, NotFoundException } from '../../../../shared/utils/response.utils';
 import * as csv from 'csv-parser';
 import * as fs from 'fs';
 import { createObjectCsvWriter } from 'csv-writer';
@@ -11,7 +11,7 @@ export class BulkPersonService {
    * Crear múltiples personas
    */
   async bulkCreate(persons: CreatePersonDto[], userId?: number) {
-    const results = {
+    const results: { successful: Array<any>, failed: Array<any> } = {
       successful: [],
       failed: []
     };
@@ -40,21 +40,21 @@ export class BulkPersonService {
             document_type: personData.document_type,
             document_number: personData.document_number,
             full_name: personData.full_name,
-            gender: personData.gender,
-            photo_url: personData.photo_url,
+            gender: typeof personData.gender === 'string' ? personData.gender : (personData.gender !== undefined ? String(personData.gender) : null),
+            photo_url: personData.photo_url !== undefined ? personData.photo_url : null,
             birth_date: personData.birth_date ? new Date(personData.birth_date) : null,
-            notes: personData.notes,
-            alias: personData.alias,
+            notes: personData.notes !== undefined ? personData.notes : null,
+            alias: personData.alias !== undefined ? personData.alias : null,
             is_active: personData.is_active ?? true,
-            username: personData.username,
+            username: personData.username !== undefined ? personData.username : null,
             password_hash: personData.password ? await this.hashPassword(personData.password) : null,
             language: personData.language || 'es',
             timezone: personData.timezone || 'America/Bogota',
             status: 'ACTIVE',
             priority: 0,
             tags: [],
-            created_by: userId,
-            updated_by: userId,
+            created_by: userId ?? null,
+            updated_by: userId ?? null,
             created_at: new Date(),
             updated_at: new Date()
           }
@@ -102,7 +102,7 @@ export class BulkPersonService {
    * Actualizar múltiples personas
    */
   async bulkUpdate(updates: Array<{ id: number; data: Partial<CreatePersonDto> }>, userId?: number) {
-    const results = {
+    const results: { successful: Array<any>, failed: Array<any> } = {
       successful: [],
       failed: []
     };
@@ -128,7 +128,7 @@ export class BulkPersonService {
         // Preparar datos para actualización
         const updateData: any = {
           updated_at: new Date(),
-          updated_by: userId
+          updated_by: userId ?? null
         };
 
         // Agregar campos que se van a actualizar
@@ -183,47 +183,58 @@ export class BulkPersonService {
    * Eliminar múltiples personas (soft delete)
    */
   async bulkDelete(ids: number[], userId?: number) {
-    const results = {
+    console.log('IDs recibidos para eliminación:', ids);
+    const results: { successful: Array<any>, failed: Array<any> } = {
       successful: [],
       failed: []
     };
 
     for (const id of ids) {
+      const parsedId = Number(id);
+      if (!Number.isInteger(parsedId) || parsedId <= 0) {
+        console.log('ID inválido detectado:', id);
+        results.failed.push({
+          data: { id },
+          errors: ['ID inválido']
+        });
+        continue;
+      }
+
       try {
         // Verificar si la persona existe
         const existingPerson = await prisma.person.findFirst({
           where: {
-            id: parseInt(id.toString()),
+            id: parsedId,
             deleted_at: null
           }
         });
 
         if (!existingPerson) {
           results.failed.push({
-            data: { id },
-            errors: [`Persona con ID ${id} no encontrada`]
+            data: { id: parsedId },
+            errors: [`Persona con ID ${parsedId} no encontrada`]
           });
           continue;
         }
 
         // Soft delete
         await prisma.person.update({
-          where: { id: parseInt(id.toString()) },
+          where: { id: parsedId },
           data: {
             deleted_at: new Date(),
             updated_at: new Date(),
-            updated_by: userId
+            updated_by: userId ?? null
           }
         });
 
         results.successful.push({
-          id: parseInt(id.toString()),
-          data: { id: parseInt(id.toString()) }
+          id: parsedId,
+          data: { id: parsedId }
         });
 
       } catch (error) {
         results.failed.push({
-          data: { id },
+          data: { id: parsedId },
           errors: [error.message]
         });
       }
@@ -238,6 +249,11 @@ export class BulkPersonService {
       'BULK_DELETE_PERSONS'
     );
   }
+
+
+
+
+  
 
   /**
    * Importar personas desde CSV

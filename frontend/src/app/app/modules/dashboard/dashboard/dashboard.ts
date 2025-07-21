@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -35,13 +35,17 @@ interface QuickAction {
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.scss']
 })
-export class DashboardComponent implements OnInit, OnDestroy {
-  
+export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
+
   // Estado del tema
   isDarkTheme = false;
   
   // Estado del sidebar
-  sidebarCollapsed = false;
+  sidebarCollapsed = true; // Inicialmente colapsado
+  
+  // Control de timing para evitar expansiones/contracciones rápidas
+  private sidebarTimeout: any = null;
+  private isExpanding = false;
   
   // Datos del dashboard
   stats: DashboardStats = {
@@ -58,8 +62,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
       title: 'Agregar Usuario',
       description: 'Crear nuevo usuario en el sistema',
       icon: '👤',
-      route: '/users/create',
+      route: '/users',
       color: 'bg-blue-500 hover:bg-blue-600'
+    },
+    {
+      id: 'view-users',
+      title: 'Ver Usuarios',
+      description: 'Gestionar usuarios existentes',
+      icon: '👥',
+      route: '/users',
+      color: 'bg-green-500 hover:bg-green-600'
     },
     {
       id: 'manage-roles',
@@ -75,14 +87,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       description: 'Generar reportes y estadísticas',
       icon: '📊',
       route: '/reports',
-      color: 'bg-green-500 hover:bg-green-600'
-    },
-    {
-      id: 'audit-logs',
-      title: 'Logs de Auditoría',
-      description: 'Revisar historial de actividades',
-      icon: '📝',
-      route: '/audit',
       color: 'bg-orange-500 hover:bg-orange-600'
     }
   ];
@@ -98,6 +102,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   notificationMessage = '';
   notificationType = 'success';
   
+  // Responsividad y menú hamburguesa
+  isMobile = false;
+  sidebarOpen = false;
+
   constructor(
     private authService: AuthService,
     private router: Router
@@ -108,6 +116,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadDashboardData();
     this.applyTheme();
     this.loadCurrentUser();
+    this.setupMouseTracking();
+  }
+
+  ngAfterViewInit(): void {
+    this.checkMobile();
+    window.addEventListener('resize', this.checkMobile.bind(this));
+  }
+
+  checkMobile(): void {
+    this.isMobile = window.innerWidth < 768;
+    if (!this.isMobile) {
+      this.sidebarOpen = false;
+    }
+  }
+
+  toggleSidebarMobile(): void {
+    this.sidebarOpen = !this.sidebarOpen;
   }
   
   ngOnDestroy(): void {
@@ -186,23 +211,134 @@ export class DashboardComponent implements OnInit, OnDestroy {
     localStorage.setItem('theme', this.isDarkTheme ? 'dark' : 'light');
   }
   
+
+
   /**
-   * Alterna el estado del sidebar
+   * Expande el sidebar
    */
-  toggleSidebar(): void {
-    this.sidebarCollapsed = !this.sidebarCollapsed;
+  expandSidebar(): void {
+    // Evitar expansiones múltiples rápidas
+    if (this.isExpanding || !this.sidebarCollapsed) return;
+    
+    this.isExpanding = true;
+    this.sidebarCollapsed = false;
+    
+    // Resetear el flag después de la animación
+    setTimeout(() => {
+      this.isExpanding = false;
+    }, 300); // Duración de la transición
+  }
+
+  /**
+   * Contrae el sidebar
+   */
+  collapseSidebar(): void {
+    // Limpiar timeout anterior si existe
+    if (this.sidebarTimeout) {
+      clearTimeout(this.sidebarTimeout);
+    }
+    
+    // Solo contraer si está expandido
+    if (!this.sidebarCollapsed) {
+      this.sidebarCollapsed = true;
+    }
+  }
+
+  /**
+   * Maneja el doble clic en opciones del sidebar
+   */
+  onSidebarItemDoubleClick(): void {
+    this.collapseSidebar();
+  }
+
+  /**
+   * Maneja cuando el mouse entra al sidebar
+   */
+  onSidebarMouseEnter(): void {
+    // Limpiar timeout de contracción si existe
+    if (this.sidebarTimeout) {
+      clearTimeout(this.sidebarTimeout);
+      this.sidebarTimeout = null;
+    }
+    
+    // Expandir automáticamente cuando el mouse entra
+    if (this.sidebarCollapsed) {
+      this.expandSidebar();
+    }
+  }
+
+  /**
+   * Maneja cuando el mouse sale del sidebar
+   */
+  onSidebarMouseLeave(): void {
+    // Solo contraer si está expandido
+    // Agregamos un delay para evitar contracciones accidentales
+    if (!this.sidebarCollapsed) {
+      this.sidebarTimeout = setTimeout(() => {
+        this.collapseSidebar();
+      }, 300); // Delay más corto para contracción más rápida
+    }
+  }
+
+  /**
+   * Maneja cuando el mouse entra al área de detección (zona cercana al sidebar)
+   */
+  onDetectionAreaMouseEnter(): void {
+    // Limpiar timeout de contracción si existe
+    if (this.sidebarTimeout) {
+      clearTimeout(this.sidebarTimeout);
+      this.sidebarTimeout = null;
+    }
+    
+    // Expandir automáticamente cuando el mouse se acerca al sidebar
+    if (this.sidebarCollapsed) {
+      this.expandSidebar();
+    }
+  }
+
+  /**
+   * Configura el tracking del mouse para detectar cuando está cerca del borde derecho
+   */
+  private setupMouseTracking(): void {
+    // Detectar cuando el mouse está cerca del borde derecho de la ventana
+    document.addEventListener('mousemove', (event) => {
+      const windowWidth = window.innerWidth;
+      const mouseX = event.clientX;
+      
+      // Si el mouse está a menos de 150px del borde derecho y el sidebar está colapsado
+      if (mouseX > windowWidth - 150 && this.sidebarCollapsed) {
+        // Limpiar timeout de contracción si existe
+        if (this.sidebarTimeout) {
+          clearTimeout(this.sidebarTimeout);
+          this.sidebarTimeout = null;
+        }
+        
+        // Expandir el sidebar
+        this.expandSidebar();
+      }
+    });
   }
   
   /**
-   * Navega a una ruta específica y contrae el sidebar
+   * Verifica si hay una ruta hija activa
+   */
+  hasChildRoute(): boolean {
+    const currentUrl = this.router.url;
+    return currentUrl.includes('/dashboard/users') || currentUrl.includes('/dashboard/roles') || currentUrl.includes('/dashboard/reports');
+  }
+
+
+
+  /**
+   * Navega a una ruta específica
    */
   navigateTo(route: string): void {
-    // TODO: Implementar navegación real
-    console.log('Navigating to:', route);
-    
-    // Contrae el sidebar automáticamente al navegar
-    if (!this.sidebarCollapsed) {
-      this.sidebarCollapsed = true;
+    // Navegar a la ruta (agregar /dashboard si no está presente)
+    const fullRoute = route.startsWith('/dashboard') ? route : `/dashboard${route}`;
+    this.router.navigate([fullRoute]);
+    // Si es móvil, cerrar el sidebar automáticamente
+    if (this.isMobile && this.sidebarOpen) {
+      this.sidebarOpen = false;
     }
   }
 

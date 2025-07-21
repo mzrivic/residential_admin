@@ -194,4 +194,12 @@ export function duplicateError(
     [validationError(field, `Ya existe un ${resource} con ${field} ${value}`, 'DUPLICATE', value)],
     operation
   );
+}
+
+// Excepción personalizada para recursos no encontrados
+export class NotFoundException extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NotFoundException';
+  }
 } 

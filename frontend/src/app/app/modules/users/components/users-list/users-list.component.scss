@@ -1,0 +1,213 @@
+// Users List Component Styles
+
+// Animaciones
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.users-list {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Estados de hover mejorados
+.user-row {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Botones de acción
+.action-button {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+// Checkbox personalizado
+.custom-checkbox {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+  transition: all 0.2s ease-in-out;
+  
+  &:checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 2px;
+      width: 6px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+    }
+  }
+  
+  &:hover {
+    border-color: #3b82f6;
+  }
+}
+
+// Avatar con gradiente
+.user-avatar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transition: all 0.3s ease-in-out;
+  
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+}
+
+// Badges de estado
+.status-badge {
+  transition: all 0.2s ease-in-out;
+  
+  &.active {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+  
+  &.inactive {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+// Paginación
+.pagination-button {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Filtros
+.filter-section {
+  transition: all 0.3s ease-in-out;
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Loading spinner
+.loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Responsive
+@media (max-width: 1024px) {
+  .users-table {
+    font-size: 0.95rem;
+  }
+  .user-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .users-table {
+    font-size: 0.875rem;
+    display: block;
+    overflow-x: auto;
+    width: 100%;
+  }
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  .action-button {
+    padding: 0.5rem;
+  }
+  .users-list {
+    padding: 0.5rem;
+  }
+  .filter-section, .pagination-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .users-table {
+    font-size: 0.8rem;
+  }
+  .users-list {
+    padding: 0.25rem;
+  }
+}
+
+// Dark mode improvements
+.dark {
+  .custom-checkbox {
+    border-color: #4b5563;
+    
+    &:checked {
+      background-color: #3b82f6;
+      border-color: #3b82f6;
+    }
+    
+    &:hover {
+      border-color: #3b82f6;
+    }
+  }
+  
+  .user-avatar {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+  }
+  
+  .status-badge {
+    &.active {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    &.inactive {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+  }
+} 

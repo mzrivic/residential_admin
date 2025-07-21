@@ -1,0 +1,53 @@
+// Estilos globales para responsividad
+
+html, body {
+  min-height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+img, video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.container-fluid {
+  width: 100%;
+  max-width: 100vw;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.responsive-table {
+  width: 100%;
+  overflow-x: auto;
+  display: block;
+}
+
+@media (max-width: 1024px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+  .container-fluid {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+  .container-fluid {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+}

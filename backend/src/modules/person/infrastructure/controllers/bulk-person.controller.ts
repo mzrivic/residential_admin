@@ -154,44 +154,21 @@ export class BulkPersonController {
         ));
       }
 
-      const results = {
-        successful: [],
-        failed: []
-      };
+      // Validar que todos los IDs sean números válidos
+      const validIds = ids.filter(id => {
+        const parsedId = Number(id);
+        return Number.isInteger(parsedId) && parsedId > 0;
+      });
 
-      for (const id of ids) {
-        try {
-          // Simular eliminación exitosa
-          results.successful.push({
-            id: id,
-            deleted_at: new Date().toISOString()
-          });
-
-        } catch (error) {
-          results.failed.push({
-            id: id,
-            errors: [error.message]
-          });
-        }
+      if (validIds.length === 0) {
+        return res.status(400).json(errorResponse(
+          'No se proporcionaron IDs válidos para eliminación',
+          [],
+          'BULK_DELETE'
+        ));
       }
 
-      const result = {
-        success: true,
-        message: 'Eliminación masiva completada',
-        data: {
-          total: ids.length,
-          successful: results.successful.length,
-          failed: results.failed.length,
-          results
-        },
-        meta: {
-          timestamp: new Date().toISOString(),
-          operation: 'BULK_DELETE',
-          version: '1.0.0',
-          requestId: Math.random().toString(36).substring(7)
-        }
-      };
-
+      const result = await bulkPersonService.bulkDelete(validIds, (req as any).user?.id);
       return res.status(200).json(result);
     } catch (error) {
       return res.status(400).json(errorResponse(
