@@ -113,6 +113,7 @@ export interface UserResponse {
   message: string;
   data: User;
   meta: any;
+  errors?: any[];
 }
 
 export interface UsersStatsResponse {
@@ -283,5 +284,15 @@ export class UsersService {
    */
   deleteUsers(ids: number[]): Observable<UserResponse> {
     return this.http.request<UserResponse>('delete', `${this.API_URL}/persons/bulk`, { body: { ids } });
+  }
+
+  /**
+   * Cambia la contraseña de un usuario (admin)
+   */
+  adminChangePassword(userId: number, new_password: string, confirm_new_password: string) {
+    return this.http.post<any>(`${this.API_URL}/persons/${userId}/change-password`, {
+      new_password,
+      confirm_new_password
+    });
   }
 } 

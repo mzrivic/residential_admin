@@ -3,6 +3,7 @@ import { successResponse, errorResponse, paginatedResponse, notFoundError, dupli
 import prisma from '../../../../config/database';
 
 export class PersonService {
+  public prisma = prisma;
   
   /**
    * Crear una nueva persona
@@ -41,13 +42,13 @@ export class PersonService {
           document_type: createPersonDto.document_type,
           document_number: createPersonDto.document_number,
           full_name: createPersonDto.full_name,
-          gender: createPersonDto.gender,
-          photo_url: createPersonDto.photo_url,
+          gender: typeof createPersonDto.gender === 'string' ? createPersonDto.gender : (createPersonDto.gender !== undefined ? String(createPersonDto.gender) : null),
+          photo_url: createPersonDto.photo_url !== undefined ? createPersonDto.photo_url : null,
           birth_date: createPersonDto.birth_date ? new Date(createPersonDto.birth_date) : null,
-          notes: createPersonDto.notes,
-          alias: createPersonDto.alias,
+          notes: createPersonDto.notes !== undefined ? createPersonDto.notes : null,
+          alias: createPersonDto.alias !== undefined ? createPersonDto.alias : null,
           is_active: createPersonDto.is_active ?? true,
-          username: createPersonDto.username,
+          username: createPersonDto.username !== undefined ? createPersonDto.username : null,
           password_hash: createPersonDto.password ? await this.hashPassword(createPersonDto.password) : null,
           language: createPersonDto.language || 'es',
           timezone: createPersonDto.timezone || 'America/Bogota',
@@ -465,7 +466,7 @@ export class PersonService {
   /**
    * Hash de contraseña (placeholder - implementar con bcrypt)
    */
-  private async hashPassword(password: string): Promise<string> {
+  public async hashPassword(password: string): Promise<string> {
     // TODO: Implementar con bcrypt
     return password; // Por ahora retorna la contraseña sin hash
   }

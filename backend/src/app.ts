@@ -69,6 +69,12 @@ app.use('/api/v1/roles', roleRoutes);
 app.use('/api/v1/permissions', permissionRoutes);
 app.use('/api/v1/audit', auditRoutes);
 
+// Log global para depuración de importación masiva
+app.post('/api/v1/persons/import', (req, res, next) => {
+  console.log('Llamada recibida a /api/v1/persons/import');
+  next();
+});
+
 // Ruta de salud
 app.get('/health', (req, res) => {
   res.status(200).json({

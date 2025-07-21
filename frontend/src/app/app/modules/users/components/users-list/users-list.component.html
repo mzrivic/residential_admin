@@ -1,8 +1,8 @@
 <!-- Users List Component - Layout Simétrico -->
 <div class="space-y-6">
   
-  <!-- Título de la página -->
-  <div class="mb-8 relative overflow-hidden">
+  <!-- Título de la página y botón Crear Usuario -->
+  <div class="mb-8 relative overflow-hidden flex flex-col md:flex-row md:items-center md:justify-between gap-4">
     <div class="relative">
       <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2 flex items-center group">
         <span class="mr-3 text-3xl sm:text-4xl">👥</span>
@@ -13,6 +13,24 @@
         Administra usuarios del sistema, sus roles y permisos.
       </p>
     </div>
+    <button 
+      (click)="openCreateUserModal()"
+      class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition-colors duration-200 shadow-md flex items-center space-x-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+      <span>Crear Usuario</span>
+    </button>
+  </div>
+
+  <!-- Botón Importar usuarios (solo admin) -->
+  <div class="flex justify-end mb-4">
+    <button (click)="openImportModal()" class="bg-green-600 hover:bg-green-800 text-white px-5 py-2 rounded-lg font-medium transition-colors duration-200 shadow-md flex items-center space-x-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+      <span>Importar usuarios</span>
+    </button>
   </div>
 
   <!-- Filtros y Búsqueda - Espaciado simétrico -->
@@ -107,13 +125,6 @@
       <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-xs sm:text-sm">
         <thead class="bg-gray-50 dark:bg-gray-700">
           <tr>
-            <th class="px-2 sm:px-4 py-2 sm:py-3 text-left">
-              <input 
-                type="checkbox" 
-                [checked]="selectedUsers.length === users.length && users.length > 0"
-                (change)="selectAllUsers()"
-                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-            </th>
             <th class="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
               Usuario
             </th>
@@ -150,17 +161,17 @@
             <th class="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
               Acciones
             </th>
+            <th class="px-2 sm:px-4 py-2 sm:py-3 text-right">
+              <input 
+                type="checkbox" 
+                [checked]="selectedUsers.length === users.length && users.length > 0"
+                (change)="selectAllUsers()"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            </th>
           </tr>
         </thead>
         <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
           <tr *ngFor="let user of users" class="hover:bg-gray-50 dark:hover:bg-gray-700">
-            <td class="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap">
-              <input 
-                type="checkbox" 
-                [checked]="selectedUsers.includes(user.id)"
-                (change)="toggleUserSelection(user.id)"
-                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-            </td>
             <td class="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap">
               <div class="flex items-center">
                 <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
@@ -232,6 +243,13 @@
                 </ng-template>
               </div>
             </td>
+            <td class="px-2 sm:px-4 py-2 sm:py-4 whitespace-nowrap text-right">
+              <input 
+                type="checkbox" 
+                [checked]="selectedUsers.includes(user.id)"
+                (change)="toggleUserSelection(user.id)"
+                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+            </td>
           </tr>
         </tbody>
       </table>
@@ -274,12 +292,21 @@
   </div>
 </div> 
 
-<!-- Modal para crear usuario -->
-<app-create-user-modal 
-  *ngIf="showCreateUserModal"
-  (userCreated)="onUserCreated($event)"
-  (modalClosed)="closeCreateUserModal()">
-</app-create-user-modal> 
+<!-- Modal para crear usuario (reutiliza app-user-form) -->
+<ng-container *ngIf="showCreateUserModal">
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+       (click)="closeCreateUserModal()">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 relative animate-fade-in"
+         (click)="$event.stopPropagation()">
+      <button (click)="closeCreateUserModal()" class="absolute top-3 right-3 w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center transition-colors">
+        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <app-user-form (userSaved)="onUserCreated()" (cancel)="closeCreateUserModal()"></app-user-form>
+    </div>
+  </div>
+</ng-container>
 
 <!-- Modal de edición de usuario -->
 <ng-container *ngIf="showEditModal && userToEdit">
@@ -316,7 +343,7 @@
 <!-- Modal de confirmación de eliminación (unificado) -->
 <ng-container *ngIf="showDeleteModal">
   <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-6 relative animate-fade-in">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-6 relative animate-fade-in max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
       <button (click)="closeDeleteModal()" class="absolute top-3 right-3 w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center transition-colors">
         <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -373,3 +400,82 @@
     </div>
   </div>
 </ng-container> 
+
+<!-- Modal de importación masiva de usuarios -->
+<div *ngIf="showImportModal" class="fixed inset-0 bg-black bg-opacity-40 z-[9999] flex items-center justify-center p-4">
+  <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full relative animate-fade-in">
+    <button (click)="closeImportModal()" class="absolute top-3 right-3 w-8 h-8 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center transition-colors">
+      <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4 pt-4 pl-6 pr-6">Importar usuarios masivamente</h3>
+    <div class="p-6 max-h-[75vh] overflow-y-auto">
+      <!-- Resultado de la importación: mensaje, advertencia, errores -->
+      <ng-container *ngIf="importResult">
+        <div *ngIf="importResult.message" class="mb-1 p-3 rounded-lg bg-green-100 text-green-800 border border-green-300 flex items-center">
+          <span class="mr-2">✅</span> {{ importResult.message }}
+          <span *ngIf="importResult.data && importResult.data.detalles && importResult.data.detalles.length > 0" class="ml-2 text-xs text-gray-500">(Ver detalles abajo)</span>
+        </div>
+        <div *ngIf="importResult.data && importResult.data.detalles && importResult.data.detalles.length > 1000" class="mb-1 p-3 rounded-lg bg-yellow-100 text-yellow-800 border border-yellow-300 flex items-center">
+          <span class="mr-2">⚠️</span> Has subido más de 1000 usuarios. Solo se procesarán los primeros 1000 registros.
+        </div>
+        <hr *ngIf="importResult.data && importResult.data.errores && importResult.data.errores.length > 0" class="my-2 border-t border-gray-200 dark:border-gray-700">
+        <div *ngIf="importResult.data && importResult.data.errores && importResult.data.errores.length > 0" class="mb-2">
+          <h4 class="font-bold text-red-700 mb-2 flex items-center"><span class="mr-2">❌</span>Errores encontrados</h4>
+          <div class="overflow-x-auto max-h-48 overflow-y-auto border border-red-200 rounded-lg mb-2">
+            <table class="min-w-full text-xs sm:text-sm">
+              <thead class="bg-red-50 sticky top-0 z-10">
+                <tr>
+                  <th class="px-2 py-1 border-b border-red-200 text-left">Fila</th>
+                  <th class="px-2 py-1 border-b border-red-200 text-left">Error</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let err of importResult.data.errores; let i = index">
+                  <td class="px-2 py-1 border-b border-red-100">{{ i + 4 }}</td>
+                  <td class="px-2 py-1 border-b border-red-100">{{ err.error }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Resumen debajo de los errores -->
+        <div *ngIf="importResult && importResult.data" class="mt-4 mb-4">
+          <h4 class="font-bold text-gray-900 dark:text-white mb-2">Resultado de la importación</h4>
+          <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 text-sm">
+            <div>Total registros: <span class="font-semibold">{{ importResult.data.totalRecords || importResult.data.total || 0 }}</span></div>
+            <div>Creados: <span class="font-semibold text-green-600">{{ importResult.data.creados || importResult.data.successful?.length || importResult.data.valid || 0 }}</span></div>
+            <div>Fallidos: <span class="font-semibold text-red-600">{{ importResult.data.errores?.length || importResult.data.failed || importResult.data.invalid || 0 }}</span></div>
+          </div>
+        </div>
+      </ng-container>
+      <div class="mb-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center bg-gray-50 dark:bg-gray-700 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+           (drop)="onFileDrop($event)" (dragover)="$event.preventDefault()">
+        <input type="file" (change)="onFileSelected($event)" class="hidden" #fileInput>
+        <div (click)="fileInput.click()">
+          <svg class="mx-auto w-12 h-12 text-blue-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <span class="block text-gray-700 dark:text-gray-200">Arrastra el archivo <b>Excel (.xlsx)</b> aquí o haz clic para seleccionarlo</span>
+          <span *ngIf="importFileName" class="block mt-2 text-blue-600 dark:text-blue-300 font-medium">Archivo seleccionado: {{ importFileName }}</span>
+        </div>
+      </div>
+      <div class="flex flex-col sm:flex-row sm:justify-between items-stretch gap-2 mt-4 mb-2">
+        <button (click)="downloadTemplate()" class="bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v16m16-8H4" />
+          </svg>
+          <span>Descargar plantilla Excel</span>
+        </button>
+        <button (click)="uploadImportFile()" [disabled]="!importFile || importLoading" class="bg-green-600 hover:bg-green-800 text-white px-5 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg *ngIf="importLoading" class="animate-spin w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <span>{{ importLoading ? 'Importando...' : 'Importar usuarios' }}</span>
+        </button>
+      </div>
+      <div *ngIf="importError" class="mt-4 text-red-600 font-medium">{{ importError }}</div>
+    </div>
+  </div>
+</div> 

@@ -6,6 +6,7 @@ import { createObjectCsvWriter } from 'csv-writer';
 import prisma from '../../../../config/database';
 
 export class BulkPersonService {
+  public prisma = prisma;
   
   /**
    * Crear múltiples personas

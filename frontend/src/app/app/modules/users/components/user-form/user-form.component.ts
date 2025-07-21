@@ -48,7 +48,15 @@ export class UserFormComponent implements OnInit, OnChanges {
   ];
 
   // Agregar propiedad para el acordeón:
-  openSection: 'basic' | 'access' | 'contact' | 'notes' | null = null;
+  openSection: 'basic' | 'access' | 'contact' | 'notes' | 'optional' | null = null;
+
+  // Errores por campo
+  errorFields: { [key: string]: string } = {};
+
+  // Toast visual
+  showToast = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' = 'success';
 
   @Input() user: User | null = null;
   @Output() userSaved = new EventEmitter<void>();
@@ -242,10 +250,9 @@ export class UserFormComponent implements OnInit, OnChanges {
     if (!this.validateForm()) {
       return;
     }
-    
     this.loading = true;
     this.error = '';
-    
+    this.errorFields = {};
     // Preparar datos
     const userData: CreateUserRequest = {
       ...this.userForm,
@@ -253,28 +260,77 @@ export class UserFormComponent implements OnInit, OnChanges {
       phones: this.userForm.phones.filter(p => p.phone.trim()),
       images: this.userForm.images.filter(i => i.image_url.trim())
     };
-    
     // Remover contraseña si está vacía en modo edición
     if (this.isEditMode && !userData.password) {
       delete userData.password;
     }
-    
     const request = this.isEditMode 
       ? this.usersService.updateUser(this.userId!, userData)
       : this.usersService.createUser(userData);
-    
     request.subscribe({
       next: (response) => {
         if (response.success) {
-          // TODO: Mostrar notificación de éxito
-          this.userSaved.emit();
+          this.error = '';
+          this.errorFields = {};
+          // Toast de éxito
+          this.showToast = true;
+          this.toastMessage = this.isEditMode ? 'Usuario actualizado exitosamente' : 'Usuario creado exitosamente';
+          this.toastType = 'success';
+          // Limpiar formulario si es creación
+          if (!this.isEditMode) {
+            this.userForm = {
+              document_type: 'CC',
+              document_number: '',
+              full_name: '',
+              gender: 'M',
+              photo_url: '',
+              birth_date: '',
+              notes: '',
+              alias: '',
+              is_active: true,
+              username: '',
+              password: '',
+              language: 'es',
+              timezone: 'America/Bogota',
+              emails: [{ email: '' }],
+              phones: [{ phone: '' }],
+              images: [{ image_url: '' }]
+            };
+          }
+          // Esperar a que el usuario vea el toast antes de cerrar el modal
+          setTimeout(() => {
+            this.showToast = false;
+            this.userSaved.emit();
+          }, 2000);
         } else {
           this.error = response.message || 'Error al guardar usuario';
+          this.showToast = true;
+          this.toastMessage = this.error;
+          this.toastType = 'error';
+          setTimeout(() => { this.showToast = false; }, 3000);
+          // Si hay errores de campos
+          if (response.errors && Array.isArray(response.errors)) {
+            response.errors.forEach((err: any) => {
+              if (err.field) {
+                this.errorFields[err.field] = err.message;
+              }
+            });
+          }
         }
       },
       error: (error) => {
-        console.error('Error saving user:', error);
         this.error = 'Error de conexión al guardar usuario';
+        this.showToast = true;
+        this.toastMessage = this.error;
+        this.toastType = 'error';
+        setTimeout(() => { this.showToast = false; }, 3000);
+        if (error.error && error.error.errors && Array.isArray(error.error.errors)) {
+          error.error.errors.forEach((err: any) => {
+            if (err.field) {
+              this.errorFields[err.field] = err.message;
+            }
+          });
+        }
       },
       complete: () => {
         this.loading = false;

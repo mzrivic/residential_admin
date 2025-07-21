@@ -89,6 +89,113 @@ export class UsersListComponent implements OnInit, OnDestroy {
   // Math para usar en el template
   Math = Math;
   
+  // Importación masiva
+  showImportModal = false;
+  importFile: File | null = null;
+  importFileName = '';
+  importLoading = false;
+  importResult: any = null;
+  importError = '';
+
+  openImportModal(): void {
+    this.showImportModal = true;
+    this.importFile = null;
+    this.importFileName = '';
+    this.importLoading = false;
+    this.importResult = null;
+    this.importError = '';
+  }
+
+  closeImportModal(): void {
+    this.showImportModal = false;
+    this.importFile = null;
+    this.importFileName = '';
+    this.importLoading = false;
+    this.importResult = null;
+    this.importError = '';
+  }
+
+  downloadTemplate(): void {
+    console.log('Descargando plantilla Excel...');
+    const backendUrl = 'http://localhost:3000/api/v1/persons/template';
+    fetch(backendUrl)
+      .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Array.from(response.headers.entries()));
+        if (!response.ok) throw new Error('No se pudo descargar la plantilla');
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'plantilla_personas.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }, 100);
+      })
+      .catch((err) => {
+        alert('No se pudo descargar la plantilla.');
+        console.error('Error al descargar plantilla:', err);
+      });
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file && (file.name.endsWith('.xlsx') || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+      this.importFile = file;
+      this.importFileName = file.name;
+      this.importError = '';
+    } else {
+      this.importError = 'Solo se permiten archivos Excel (.xlsx)';
+    }
+  }
+
+  onFileDrop(event: DragEvent): void {
+    event.preventDefault();
+    if (event.dataTransfer && event.dataTransfer.files.length > 0) {
+      const file = event.dataTransfer.files[0];
+      if (file && (file.name.endsWith('.xlsx') || file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+        this.importFile = file;
+        this.importFileName = file.name;
+        this.importError = '';
+      } else {
+        this.importError = 'Solo se permiten archivos Excel (.xlsx)';
+      }
+    }
+  }
+
+  uploadImportFile(): void {
+    if (!this.importFile) return;
+    this.importLoading = true;
+    this.importResult = null;
+    this.importError = '';
+    const formData = new FormData();
+    formData.append('file', this.importFile); // El campo debe ser 'file'
+    fetch('http://localhost:3000/api/v1/persons/import', {
+      method: 'POST',
+      body: formData
+    })
+      .then(async res => {
+        const data = await res.json();
+        if (res.ok && data.success) {
+          this.importResult = data;
+          this.loadUsers(); // Refrescar lista tras importación exitosa
+        } else {
+          this.importError = data.message || 'Error al importar usuarios';
+        }
+      })
+      .catch(() => {
+        this.importError = 'Error de conexión al importar usuarios';
+      })
+      .finally(() => {
+        this.importLoading = false;
+      });
+  }
+  
   constructor(
     private usersService: UsersService,
     private router: Router
@@ -220,7 +327,7 @@ export class UsersListComponent implements OnInit, OnDestroy {
   /**
    * Maneja cuando se crea un usuario exitosamente
    */
-  onUserCreated(user: any): void {
+  onUserCreated(): void {
     this.closeCreateUserModal();
     this.loadUsers();
   }
@@ -267,7 +374,6 @@ export class UsersListComponent implements OnInit, OnDestroy {
   confirmDeleteUser(): void {
     // Si hay selección múltiple, eliminar todos
     const validIds = this.selectedUsers.filter(id => id !== undefined && id !== null && !isNaN(id));
-    
     if (validIds.length >= 1) {
       this.deleteLoading = true;
       this.deleteError = null;
@@ -279,6 +385,8 @@ export class UsersListComponent implements OnInit, OnDestroy {
             this.deleteSuccess = response.message || 'Usuarios eliminados exitosamente';
             setTimeout(() => {
               this.closeDeleteModal();
+              this.selectedUsers = [];
+              this.updateFilteredSelectedUsers();
               this.loadUsers();
             }, 1200);
           } else {

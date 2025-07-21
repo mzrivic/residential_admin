@@ -777,4 +777,42 @@ export class PersonController {
       ));
     }
   }
+
+  /**
+   * @route POST /api/v1/persons/:id/change-password
+   * @desc Cambiar la contraseña de un usuario (solo admin)
+   * @access Admin
+   */
+  async adminChangePassword(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { new_password, confirm_new_password } = req.body;
+      // TODO: Verificar que el usuario autenticado es admin
+      if (!new_password || !confirm_new_password) {
+        return res.status(400).json(errorResponse('Se requiere nueva contraseña y confirmación', [], 'ADMIN_CHANGE_PASSWORD'));
+      }
+      if (new_password !== confirm_new_password) {
+        return res.status(400).json(errorResponse('Las contraseñas no coinciden', [], 'ADMIN_CHANGE_PASSWORD'));
+      }
+      // Hash de la nueva contraseña
+      const personService = this.personService;
+      const password_hash = await personService['hashPassword'](new_password);
+      // Actualizar contraseña
+      await personService['prisma'].person.update({
+        where: { id: parseInt(id) },
+        data: { password_hash }
+      });
+      return res.status(200).json(successResponse(
+        { id: parseInt(id) },
+        'Contraseña cambiada exitosamente',
+        'ADMIN_CHANGE_PASSWORD'
+      ));
+    } catch (error) {
+      return res.status(400).json(errorResponse(
+        error.message,
+        [],
+        'ADMIN_CHANGE_PASSWORD'
+      ));
+    }
+  }
 } 

@@ -36,56 +36,174 @@
     </div>
   </div>
 
+<!-- Toast visual (fuera del formulario, z-[99999]) -->
+<div *ngIf="showToast" class="fixed top-8 left-1/2 transform -translate-x-1/2 z-[99999] min-w-[260px] max-w-xs px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3 animate-fade-in transition-all duration-300"
+     [ngClass]="toastType === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'">
+  <svg *ngIf="toastType === 'success'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+  </svg>
+  <svg *ngIf="toastType === 'error'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+  </svg>
+  <span class="font-medium">{{ toastMessage }}</span>
+</div>
+
   <!-- Form -->
   <div *ngIf="!loading" class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
     <form (ngSubmit)="saveUser()" class="space-y-6">
-      <!-- Acordeón: Datos Básicos -->
+      <!-- Sección: Información Obligatoria -->
+      <div class="rounded-xl border-2 border-blue-400 bg-blue-50 dark:bg-blue-900/20 shadow-sm p-6 mb-6">
+        <h3 class="text-lg font-bold text-blue-700 dark:text-blue-300 mb-4 flex items-center">
+          <svg class="w-6 h-6 mr-2 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+          Información Obligatoria
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Tipo de Documento *
+            </label>
+            <select 
+              [(ngModel)]="userForm.document_type"
+              name="document_type"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+              <option *ngFor="let type of documentTypes" [value]="type">{{ type }}</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Número de Documento *
+            </label>
+            <input 
+              type="text" 
+              [(ngModel)]="userForm.document_number"
+              name="document_number"
+              placeholder="12345678"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+            <div *ngIf="errorFields['document_number']" class="text-red-500 text-xs mt-1">{{ errorFields['document_number'] }}</div>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Nombre Completo *
+            </label>
+            <input 
+              type="text" 
+              [(ngModel)]="userForm.full_name"
+              name="full_name"
+              placeholder="Juan Carlos Pérez González"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+            <div *ngIf="errorFields['full_name']" class="text-red-500 text-xs mt-1">{{ errorFields['full_name'] }}</div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Nombre de Usuario *
+            </label>
+            <input 
+              type="text" 
+              [(ngModel)]="userForm.username"
+              name="username"
+              placeholder="usuario123"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+            <div *ngIf="errorFields['username']" class="text-red-500 text-xs mt-1">{{ errorFields['username'] }}</div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Contraseña {{ isEditMode ? '(dejar vacío para no cambiar)' : '*' }}
+            </label>
+            <input 
+              type="password" 
+              [(ngModel)]="userForm.password"
+              name="password"
+              placeholder="••••••••"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+            <div *ngIf="errorFields['password']" class="text-red-500 text-xs mt-1">{{ errorFields['password'] }}</div>
+          </div>
+        </div>
+      </div>
+      <!-- Acordeón: Información Opcional -->
       <div class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-4">
-        <button type="button" (click)="openSection = openSection === 'basic' ? null : 'basic'"
+        <button type="button" (click)="openSection = openSection === 'optional' ? null : 'optional'"
           class="w-full flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-          <span class="font-semibold text-gray-900 dark:text-white flex items-center">
-            <span class="mr-2">📋</span> Datos Básicos
+          <span class="font-semibold text-gray-700 dark:text-gray-200 flex items-center">
+            <svg class="w-6 h-6 mr-2 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+            Información Opcional
           </span>
-          <svg [ngClass]="{ 'rotate-180': openSection === 'basic' }" class="w-5 h-5 text-blue-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg [ngClass]="{ 'rotate-180': openSection === 'optional' }" class="w-5 h-5 text-blue-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
         </button>
-        <div *ngIf="openSection === 'basic'" class="px-6 py-4 animate-fade-in">
-          <!-- Campos de datos básicos aquí -->
+        <div *ngIf="openSection === 'optional'" class="px-6 py-4 animate-fade-in">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Tipo de Documento *
+                Género
               </label>
               <select 
-                [(ngModel)]="userForm.document_type"
-                name="document_type"
+                [(ngModel)]="userForm.gender"
+                name="gender"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                <option *ngFor="let type of documentTypes" [value]="type">{{ type }}</option>
+                <option *ngFor="let option of genderOptions" [value]="option.value">{{ option.label }}</option>
               </select>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Número de Documento *
+                Fecha de Nacimiento
+              </label>
+              <input 
+                type="date" 
+                [(ngModel)]="userForm.birth_date"
+                name="birth_date"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Alias
               </label>
               <input 
                 type="text" 
-                [(ngModel)]="userForm.document_number"
-                name="document_number"
-                placeholder="12345678"
+                [(ngModel)]="userForm.alias"
+                name="alias"
+                placeholder="Juan"
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                URL de Foto
+              </label>
+              <input 
+                type="url" 
+                [(ngModel)]="userForm.photo_url"
+                name="photo_url"
+                placeholder="https://via.placeholder.com/150"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
             </div>
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Nombre Completo *
+                Notas
               </label>
-              <input 
-                type="text" 
-                [(ngModel)]="userForm.full_name"
-                name="full_name"
-                placeholder="Juan Carlos Pérez González"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+              <textarea 
+                [(ngModel)]="userForm.notes"
+                name="notes"
+                rows="3"
+                placeholder="Información adicional sobre el usuario..."
+                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none"></textarea>
             </div>
+          </div>
+        </div>
+      </div>
+      <!-- Acordeón: Acceso -->
+      <div class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-4">
+        <button type="button" (click)="openSection = openSection === 'access' ? null : 'access'"
+          class="w-full flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
+          <span class="font-semibold text-gray-900 dark:text-white flex items-center">
+            <span class="mr-2">🔐</span> Acceso
+          </span>
+          <svg [ngClass]="{ 'rotate-180': openSection === 'access' }" class="w-5 h-5 text-blue-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <div *ngIf="openSection === 'access'" class="px-6 py-4 animate-fade-in">
+          <!-- Campos de acceso aquí -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Género
@@ -135,85 +253,6 @@
           </div>
         </div>
       </div>
-      <!-- Acordeón: Acceso -->
-      <div class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-4">
-        <button type="button" (click)="openSection = openSection === 'access' ? null : 'access'"
-          class="w-full flex items-center justify-between px-6 py-4 bg-gray-50 dark:bg-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors">
-          <span class="font-semibold text-gray-900 dark:text-white flex items-center">
-            <span class="mr-2">🔐</span> Acceso
-          </span>
-          <svg [ngClass]="{ 'rotate-180': openSection === 'access' }" class="w-5 h-5 text-blue-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-          </svg>
-        </button>
-        <div *ngIf="openSection === 'access'" class="px-6 py-4 animate-fade-in">
-          <!-- Campos de acceso aquí -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Nombre de Usuario *
-              </label>
-              <input 
-                type="text" 
-                [(ngModel)]="userForm.username"
-                name="username"
-                placeholder="usuario123"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Contraseña {{ isEditMode ? '(dejar vacío para no cambiar)' : '*' }}
-              </label>
-              <input 
-                type="password" 
-                [(ngModel)]="userForm.password"
-                name="password"
-                placeholder="••••••••"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Idioma
-              </label>
-              <select 
-                [(ngModel)]="userForm.language"
-                name="language"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                <option value="es">Español</option>
-                <option value="en">English</option>
-                <option value="fr">Français</option>
-              </select>
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Zona Horaria
-              </label>
-              <select 
-                [(ngModel)]="userForm.timezone"
-                name="timezone"
-                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
-                <option value="America/Bogota">America/Bogota</option>
-                <option value="America/New_York">America/New_York</option>
-                <option value="Europe/Madrid">Europe/Madrid</option>
-              </select>
-            </div>
-            
-            <div class="md:col-span-2">
-              <label class="flex items-center">
-                <input 
-                  type="checkbox" 
-                  [(ngModel)]="userForm.is_active"
-                  name="is_active"
-                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">Usuario Activo</span>
-              </label>
-            </div>
-          </div>
-        </div>
-      </div>
       <!-- Acordeón: Contacto -->
       <div class="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden mb-4">
         <button type="button" (click)="openSection = openSection === 'contact' ? null : 'contact'"
@@ -240,6 +279,7 @@
                     [name]="'email_' + i"
                     placeholder="usuario@ejemplo.com"
                     class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                  <div *ngIf="errorFields['emails']" class="text-red-500 text-xs mt-1">{{ errorFields['emails'] }}</div>
                   <button 
                     *ngIf="userForm.emails.length > 1"
                     type="button"
@@ -264,6 +304,7 @@
                     [name]="'phone_' + i"
                     placeholder="+57 300 123 4567"
                     class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white">
+                  <div *ngIf="errorFields['phones']" class="text-red-500 text-xs mt-1">{{ errorFields['phones'] }}</div>
                   <button 
                     *ngIf="userForm.phones.length > 1"
                     type="button"
@@ -328,19 +369,23 @@
         </div>
       </div>
 
-      <!-- Botones de Acción -->
-      <div class="border-t border-gray-200 dark:border-gray-700 pt-6 flex justify-end space-x-3">
+      <!-- Espacio inferior para que los botones no tapen el contenido -->
+      <div class="h-24"></div>
+      <!-- Botones de Acción fijos abajo (dentro del form) -->
+      <div class="fixed left-1/2 bottom-4 transform -translate-x-1/2 z-50 w-[95vw] max-w-2xl px-4 sm:px-8 py-4 bg-white/80 dark:bg-gray-900/80 border border-gray-200 dark:border-gray-700 shadow-xl rounded-2xl flex flex-col sm:flex-row justify-end items-center gap-3 backdrop-blur-md transition-all duration-300"
+           style="">
         <button 
           type="button"
           (click)="triggerCancel()"
-          class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200">
+          class="bg-gray-500 hover:bg-gray-700 text-white px-7 py-2 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+          <svg class="w-5 h-5 mr-2 inline-block align-middle" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
           Cancelar
         </button>
         <button 
           type="submit"
           [disabled]="loading"
-          class="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-6 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2">
-          <svg *ngIf="loading" class="animate-spin w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          class="bg-blue-600 hover:bg-blue-800 disabled:bg-blue-400 text-white px-7 py-2 rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2">
+          <svg *ngIf="loading" class="animate-spin w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
           </svg>
           <span>{{ isEditMode ? 'Actualizar' : 'Crear' }} Usuario</span>

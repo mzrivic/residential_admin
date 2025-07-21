@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PersonController } from '../../infrastructure/controllers/person.controller';
-import { BulkPersonController } from '../../infrastructure/controllers/bulk-person.controller';
+import { BulkPersonController, upload } from '../../infrastructure/controllers/bulk-person.controller';
 import { PersonService } from '../../application/services/person.service';
 
 const router = Router();
@@ -12,7 +12,7 @@ const bulkPersonController = new BulkPersonController();
 router.post('/bulk', (req, res) => bulkPersonController.bulkCreate(req, res));
 router.put('/bulk', (req, res) => bulkPersonController.bulkUpdate(req, res));
 router.delete('/bulk', (req, res) => bulkPersonController.bulkDelete(req, res));
-router.post('/import', (req, res) => bulkPersonController.importFromCSV(req, res));
+router.post('/import', upload.single('file'), (req, res) => bulkPersonController.importFromCSV(req, res));
 router.get('/export', (req, res) => bulkPersonController.exportToCSV(req, res));
 router.post('/bulk-roles', (req, res) => bulkPersonController.bulkAssignRoles(req, res));
 
@@ -35,16 +35,15 @@ router.get('/stats/reports', (req, res) => personController.getReports(req, res)
 // Rutas principales de personas
 router.post('/', (req, res) => personController.create(req, res));
 router.get('/', (req, res) => personController.findAll(req, res));
-router.get('/:id', (req, res) => personController.findOne(req, res));
-router.put('/:id', (req, res) => personController.update(req, res));
-router.put('/:id/partial', (req, res) => personController.updatePartial(req, res));
-router.delete('/:id', (req, res) => personController.remove(req, res));
-router.post('/:id/restore', (req, res) => personController.restore(req, res));
-
+// Descargar plantilla CSV para importación masiva (debe ir antes de rutas con parámetros)
+router.get('/template', (req, res) => bulkPersonController.downloadTemplate(req, res));
 // Validación y Verificación (con parámetros)
 router.post('/:id/verify', (req, res) => personController.verifyUser(req, res));
 router.post('/:id/verify-email', (req, res) => personController.verifyEmail(req, res));
 router.post('/:id/verify-phone', (req, res) => personController.verifyPhone(req, res));
+
+// Cambiar contraseña de usuario por admin
+router.post('/:id/change-password', (req, res) => personController.adminChangePassword(req, res));
 
 // Auditoría
 router.get('/:id/audit', (req, res) => personController.getAuditHistory(req, res));
